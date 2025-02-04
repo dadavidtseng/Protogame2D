@@ -101,17 +101,7 @@ void Game::AdjustForPauseAndTimeDistortion(float& deltaSeconds)
 //----------------------------------------------------------------------------------------------------
 void Game::RenderAttractMode() const
 {
-    // DebugDrawRing(Vec2(800.f, 400.f), 300.f, 10.f, Rgba8(255, 127, 0));
-
-    // Add a hard-coded array of vertices to define our triangle.
-    Vertex_PCU vertices[] =
-    {
-        Vertex_PCU(Vec3(-0.5f, -0.5f, 0.f), Rgba8::WHITE, Vec2::ZERO),
-        Vertex_PCU(Vec3(0.f, 0.5f, 0.f), Rgba8::WHITE, Vec2::ZERO),
-        Vertex_PCU(Vec3(0.5f, -0.5f, 0.f), Rgba8::WHITE),
-    };
-
-    g_theRenderer->DrawVertexArray(3, vertices);
+    DebugDrawRing(Vec2(800.f, 400.f), 300.f, 10.f, Rgba8(255, 127, 0));
 }
 
 //----------------------------------------------------------------------------------------------------
