@@ -48,6 +48,8 @@ void App::Startup()
     g_theRenderer         = new Renderer(renderConfig);
 
     DevConsoleConfig devConsoleConfig;
+    devConsoleConfig.m_defaultRenderer = g_theRenderer;
+    devConsoleConfig.m_defaultFontName = "SquirrelFixedFont";
     g_theDevConsole = new DevConsole(devConsoleConfig);
 
     AudioSystemConfig audioConfig;
