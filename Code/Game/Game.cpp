@@ -35,14 +35,14 @@ void Game::Update(float deltaSeconds)
     UpdateFromController();
     AdjustForPauseAndTimeDistortion(deltaSeconds);
 
-    if (g_theInput->WasKeyJustPressed(KEYCODE_OEM_3))
+    if (g_theInput->WasKeyJustPressed(KEYCODE_TILDE))
     {
         g_theDevConsole->ToggleMode(OPEN_FULL);
     }
 
     if (g_theInput->WasKeyJustPressed(KEYCODE_ENTER))
     {
-        g_theDevConsole->AddLine(Rgba8::WHITE, "SHOOT");
+        // g_theDevConsole->AddLine(Rgba8::WHITE, "SHOOT");
         g_theDevConsole->Execute("SHOOT");
     }
 }
