@@ -17,14 +17,17 @@
 #include "Game/Game.hpp"
 
 //----------------------------------------------------------------------------------------------------
-App*                   g_theApp        = nullptr;       // Created and owned by Main_Windows.cpp
-AudioSystem*           g_theAudio      = nullptr;       // Created and owned by the App
-BitmapFont*            g_theBitmapFont = nullptr;       // Created and owned by the App
-Game*                  g_theGame       = nullptr;       // Created and owned by the App
-InputSystem*           g_theInput      = nullptr;       // Created and owned by the App
-Renderer*              g_theRenderer   = nullptr;       // Created and owned by the App
-RandomNumberGenerator* g_theRNG        = nullptr;       // Created and owned by the App
-Window*                g_theWindow     = nullptr;       // Created and owned by the App
+App*         g_theApp        = nullptr;       // Created and owned by Main_Windows.cpp
+AudioSystem* g_theAudio      = nullptr;       // Created and owned by the App
+BitmapFont*  g_theBitmapFont = nullptr;       // Created and owned by the App
+Game*        g_theGame       = nullptr;       // Created and owned by the App
+// InputSystem*           g_theInput      = nullptr;       // Created and owned by the App
+Renderer*              g_theRenderer = nullptr;       // Created and owned by the App
+RandomNumberGenerator* g_theRNG      = nullptr;       // Created and owned by the App
+Window*                g_theWindow   = nullptr;       // Created and owned by the App
+
+//----------------------------------------------------------------------------------------------------
+STATIC bool App::m_isQuitting = false;
 
 //----------------------------------------------------------------------------------------------------
 void App::Startup()
@@ -50,7 +53,7 @@ void App::Startup()
     DevConsoleConfig devConsoleConfig;
     devConsoleConfig.m_defaultRenderer = g_theRenderer;
     devConsoleConfig.m_defaultFontName = "SquirrelFixedFont";
-    g_theDevConsole = new DevConsole(devConsoleConfig);
+    g_theDevConsole                    = new DevConsole(devConsoleConfig);
 
     AudioSystemConfig audioConfig;
     g_theAudio = new AudioSystem(audioConfig);
@@ -128,6 +131,21 @@ void App::RunMainLoop()
         // Sleep(16); // Temporary code to "slow down" our app to ~60Hz until we have proper frame timing in
         RunFrame();
     }
+}
+
+//----------------------------------------------------------------------------------------------------
+STATIC bool App::OnWindowClose(EventArgs& arg)
+{
+    UNUSED(arg)
+
+    RequestQuit();
+    return true;
+}
+
+//----------------------------------------------------------------------------------------------------
+STATIC void App::RequestQuit()
+{
+    m_isQuitting = true;
 }
 
 //----------------------------------------------------------------------------------------------------
@@ -213,19 +231,4 @@ void App::DeleteAndCreateNewGame()
     g_theGame = nullptr;
 
     g_theGame = new Game();
-}
-
-//----------------------------------------------------------------------------------------------------
-bool OnWindowClose(EventArgs& arg)
-{
-    UNUSED(arg)
-
-    RequestQuit();
-    return true;
-}
-
-//----------------------------------------------------------------------------------------------------
-void RequestQuit()
-{
-    m_isQuitting = true;
 }

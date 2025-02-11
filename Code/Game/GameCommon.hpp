@@ -19,7 +19,7 @@ class RandomNumberGenerator;
 extern App*                   g_theApp;
 extern AudioSystem*           g_theAudio;
 extern BitmapFont*            g_theBitmapFont;
-extern InputSystem*           g_theInput;
+// extern InputSystem*           g_theInput;
 extern Renderer*              g_theRenderer;
 extern RandomNumberGenerator* g_theRNG;
 

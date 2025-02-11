@@ -21,6 +21,10 @@ public:
 
     void RunMainLoop();
 
+    static bool OnWindowClose(EventArgs& arg);
+    static void RequestQuit();
+    static bool m_isQuitting;
+
 private:
     void BeginFrame() const;
     void Update(float deltaSeconds);
@@ -35,6 +39,4 @@ private:
     float m_timeLastFrameStart = 0.f;
 };
 
-static bool OnWindowClose(EventArgs& arg);
-static void RequestQuit();
-static bool m_isQuitting;
+
