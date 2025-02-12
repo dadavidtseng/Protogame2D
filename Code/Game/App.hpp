@@ -21,7 +21,7 @@ public:
 
     void RunMainLoop();
 
-    static bool OnWindowClose(EventArgs& arg);
+    static bool OnWindowClose(EventArgs& args);
     static void RequestQuit();
     static bool m_isQuitting;
 

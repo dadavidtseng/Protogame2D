@@ -35,7 +35,7 @@ void App::Startup()
     // Create All Engine Subsystems
     EventSystemConfig eventSystemConfig;
     g_theEventSystem = new EventSystem(eventSystemConfig);
-    g_theEventSystem->SubscribeEventCallbackFunction("WindowClose", OnWindowClose);
+    g_theEventSystem->SubscribeEventCallbackFunction("WM_CLOSE", OnWindowClose);
 
     InputSystemConfig inputConfig;
     g_theInput = new InputSystem(inputConfig);
@@ -59,10 +59,10 @@ void App::Startup()
     g_theAudio = new AudioSystem(audioConfig);
 
     g_theEventSystem->Startup();
-    g_theInput->Startup();
     g_theWindow->Startup();
     g_theRenderer->Startup();
     g_theDevConsole->StartUp();
+    g_theInput->Startup();
     g_theAudio->Startup();
 
     g_theBitmapFont = g_theRenderer->CreateOrGetBitmapFontFromFile("Data/Fonts/SquirrelFixedFont"); // DO NOT SPECIFY FILE .EXTENSION!!  (Important later on.)
@@ -128,18 +128,19 @@ void App::RunMainLoop()
     // Program main loop; keep running frames until it's time to quit
     while (!m_isQuitting)
     {
-        // Sleep(16); // Temporary code to "slow down" our app to ~60Hz until we have proper frame timing in
+         // Sleep(16); // Temporary code to "slow down" our app to ~60Hz until we have proper frame timing in
         RunFrame();
     }
 }
 
 //----------------------------------------------------------------------------------------------------
-STATIC bool App::OnWindowClose(EventArgs& arg)
+STATIC bool App::OnWindowClose(EventArgs& args)
 {
-    UNUSED(arg)
+    UNUSED(args)
 
     RequestQuit();
-    return true;
+
+    return false;
 }
 
 //----------------------------------------------------------------------------------------------------

@@ -42,8 +42,8 @@ void Game::Update(float deltaSeconds)
 
     if (g_theInput->WasKeyJustPressed(KEYCODE_ENTER))
     {
-        g_theDevConsole->AddLine(Rgba8::WHITE, "SHOOT");
-        g_theDevConsole->Execute("SHOOT");
+        g_theDevConsole->AddLine(DevConsole::INFO_MAJOR, "SHO  OT");
+        g_theDevConsole->Execute("help a=b");
     }
 }
 
@@ -61,7 +61,7 @@ void Game::Render() const
 
 void Game::TestDevConsole() const
 {
-    AABB2 const box = AABB2(Vec2::ZERO, Vec2(1600.f, 100.f));
+    AABB2 const box = AABB2(Vec2::ZERO, Vec2(1600.f, 60.f));
 
     g_theDevConsole->Render(box);
 }
