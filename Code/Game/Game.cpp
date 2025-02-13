@@ -54,7 +54,7 @@ void Game::Render() const
 
     m_isAttractMode ? RenderAttractMode() : RenderUI();
 
-    TestDevConsole();
+    // TestDevConsole();
 
     g_theRenderer->EndCamera(*m_screenCamera);
 }

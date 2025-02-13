@@ -6,6 +6,7 @@
 #pragma once
 #include "Engine/Core/EventSystem.hpp"
 
+class Camera;
 //----------------------------------------------------------------------------------------------------
 class Game;
 
@@ -37,6 +38,6 @@ private:
     void DeleteAndCreateNewGame();
 
     float m_timeLastFrameStart = 0.f;
+
+    Camera* m_devConsoleCamera = nullptr;
 };
-
-

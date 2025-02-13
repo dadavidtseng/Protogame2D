@@ -5,6 +5,7 @@
 //----------------------------------------------------------------------------------------------------
 #include "Game/App.hpp"
 
+#include "GameCommon.hpp"
 #include "Engine/Audio/AudioSystem.hpp"
 #include "Engine/Core/DevConsole.hpp"
 #include "Engine/Core/EngineCommon.hpp"
@@ -50,9 +51,17 @@ void App::Startup()
     renderConfig.m_window = g_theWindow;
     g_theRenderer         = new Renderer(renderConfig);
 
+    m_devConsoleCamera = new Camera();
+
+    Vec2 const bottomLeft     = Vec2::ZERO;
+    Vec2 const screenTopRight = Vec2(SCREEN_SIZE_X, SCREEN_SIZE_Y);
+
+    m_devConsoleCamera->SetOrthoView(bottomLeft, screenTopRight);
+
     DevConsoleConfig devConsoleConfig;
     devConsoleConfig.m_defaultRenderer = g_theRenderer;
     devConsoleConfig.m_defaultFontName = "SquirrelFixedFont";
+    devConsoleConfig.m_defaultCamera   = m_devConsoleCamera;
     g_theDevConsole                    = new DevConsole(devConsoleConfig);
 
     AudioSystemConfig audioConfig;
@@ -128,7 +137,7 @@ void App::RunMainLoop()
     // Program main loop; keep running frames until it's time to quit
     while (!m_isQuitting)
     {
-         // Sleep(16); // Temporary code to "slow down" our app to ~60Hz until we have proper frame timing in
+        // Sleep(16); // Temporary code to "slow down" our app to ~60Hz until we have proper frame timing in
         RunFrame();
     }
 }
@@ -182,6 +191,10 @@ void App::Render() const
 
     g_theRenderer->ClearScreen(clearColor);
     g_theGame->Render();
+
+    AABB2 const box = AABB2(Vec2::ZERO, Vec2(1600.f, 30.f));
+
+    g_theDevConsole->Render(box);
 }
 
 //----------------------------------------------------------------------------------------------------
