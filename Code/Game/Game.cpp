@@ -61,7 +61,7 @@ void Game::Render() const
 
 void Game::TestDevConsole() const
 {
-    AABB2 const box = AABB2(Vec2::ZERO, Vec2(1600.f, 60.f));
+    AABB2 const box = AABB2(Vec2::ZERO, Vec2(1600.f, 30.f));
 
     g_theDevConsole->Render(box);
 }
