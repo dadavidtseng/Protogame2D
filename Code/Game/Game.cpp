@@ -40,11 +40,11 @@ void Game::Update(float deltaSeconds)
         g_theDevConsole->ToggleMode(OPEN_FULL);
     }
 
-    if (g_theInput->WasKeyJustPressed(KEYCODE_ENTER))
-    {
-        g_theDevConsole->AddLine(DevConsole::INFO_MAJOR, "SHO  OT");
-        g_theDevConsole->Execute("help a=b");
-    }
+    // if (g_theInput->WasKeyJustPressed(KEYCODE_ENTER))
+    // {
+    //     g_theDevConsole->AddLine(DevConsole::INFO_MAJOR, "SHO  OT");
+    //     g_theDevConsole->Execute("help a=b");
+    // }
 }
 
 //----------------------------------------------------------------------------------------------------
