@@ -37,6 +37,7 @@ void App::Startup()
     EventSystemConfig eventSystemConfig;
     g_theEventSystem = new EventSystem(eventSystemConfig);
     g_theEventSystem->SubscribeEventCallbackFunction("WM_CLOSE", OnWindowClose);
+    g_theEventSystem->SubscribeEventCallbackFunction("quit", OnWindowClose);
 
     InputSystemConfig inputConfig;
     g_theInput = new InputSystem(inputConfig);
@@ -149,7 +150,7 @@ STATIC bool App::OnWindowClose(EventArgs& args)
 
     RequestQuit();
 
-    return false;
+    return true;
 }
 
 //----------------------------------------------------------------------------------------------------
