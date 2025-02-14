@@ -4,6 +4,8 @@
 
 //----------------------------------------------------------------------------------------------------
 #pragma once
+#include "Engine/Core/Clock.hpp"
+#include "Engine/Core/Timer.hpp"
 
 //----------------------------------------------------------------------------------------------------
 class Camera;
@@ -29,4 +31,6 @@ private:
 
     Camera* m_screenCamera  = nullptr;
     bool    m_isAttractMode = true;
+    Clock*  m_clock         = nullptr;
+    Timer*  m_timer         = nullptr;
 };

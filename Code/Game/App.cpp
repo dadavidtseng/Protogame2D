@@ -9,6 +9,7 @@
 #include "Engine/Audio/AudioSystem.hpp"
 #include "Engine/Core/DevConsole.hpp"
 #include "Engine/Core/EngineCommon.hpp"
+#include "Engine/Core/ErrorWarningAssert.hpp"
 #include "Engine/Core/Time.hpp"
 #include "Engine/Input/InputSystem.hpp"
 #include "Engine/Math/RandomNumberGenerator.hpp"
@@ -78,6 +79,11 @@ void App::Startup()
     g_theBitmapFont = g_theRenderer->CreateOrGetBitmapFontFromFile("Data/Fonts/SquirrelFixedFont"); // DO NOT SPECIFY FILE .EXTENSION!!  (Important later on.)
     g_theRNG        = new RandomNumberGenerator();
     g_theGame       = new Game();
+
+    Clock::GetSystemClock();
+    m_timer = new Timer(1.0f);
+    Clock::TickSystemClock();
+    m_timer->Start();
 }
 
 //----------------------------------------------------------------------------------------------------
@@ -124,10 +130,25 @@ void App::RunFrame()
     float const deltaSeconds = timeNow - m_timeLastFrameStart;
     m_timeLastFrameStart     = timeNow;
 
+
+    // DebuggerPrintf("DeltaSecond: %f\n", Clock::GetSystemClock().GetDeltaSeconds());
+
+
     // DebuggerPrintf("TimeNow = %.06f\n", timeNow);
 
     BeginFrame();         // Engine pre-frame stuff
+    // DebuggerPrintf("TotalSecond: %f\n", Clock::GetSystemClock().GetTotalSeconds());
     Update(deltaSeconds); // Game updates / moves / spawns / hurts / kills stuff
+
+
+    // DebuggerPrintf("m_timer->GetElapsedTime: %f\n", m_timer->GetElapsedTime());
+
+    if (m_timer->HasPeriodElapsed())
+    {
+        // DebuggerPrintf("SystemClock %f\n", m_timer->GetElapsedTime());
+        m_timer->DecrementPeriodIfElapsed();
+    }
+
     Render();             // Game draws current state of things
     EndFrame();           // Engine post-frame stuff
 }
@@ -162,6 +183,9 @@ STATIC void App::RequestQuit()
 //----------------------------------------------------------------------------------------------------
 void App::BeginFrame() const
 {
+    Clock::TickSystemClock();
+
+
     g_theEventSystem->BeginFrame();
     g_theInput->BeginFrame();
     g_theWindow->BeginFrame();
@@ -174,6 +198,8 @@ void App::BeginFrame() const
 //----------------------------------------------------------------------------------------------------
 void App::Update(float const deltaSeconds)
 {
+    Clock::TickSystemClock();
+
     HandleKeyPressed();
     HandleKeyReleased();
     g_theGame->Update(deltaSeconds);

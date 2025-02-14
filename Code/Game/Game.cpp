@@ -6,6 +6,7 @@
 #include "Game/Game.hpp"
 
 #include "Engine/Audio/AudioSystem.hpp"
+#include "Engine/Core/Clock.hpp"
 #include "Engine/Core/DevConsole.hpp"
 #include "Engine/Core/EngineCommon.hpp"
 #include "Engine/Core/ErrorWarningAssert.hpp"
@@ -23,12 +24,18 @@ Game::Game()
     Vec2 const screenTopRight = Vec2(SCREEN_SIZE_X, SCREEN_SIZE_Y);
 
     m_screenCamera->SetOrthoView(bottomLeft, screenTopRight);
+
+    m_clock = new Clock(Clock::GetSystemClock());
+    m_timer = new Timer(2.f, m_clock);
+    Clock::TickSystemClock();
+    m_timer->Start();
 }
 
 //----------------------------------------------------------------------------------------------------
 void Game::Update(float deltaSeconds)
 {
     UNUSED(deltaSeconds)
+
 
     // #TODO: Select keyboard or controller
     UpdateFromKeyBoard();
@@ -45,6 +52,12 @@ void Game::Update(float deltaSeconds)
     //     g_theDevConsole->AddLine(DevConsole::INFO_MAJOR, "SHO  OT");
     //     g_theDevConsole->Execute("help a=b");
     // }
+
+    if (m_timer->HasPeriodElapsed())
+    {
+        DebuggerPrintf("GameClock: %f\n", m_timer->GetElapsedTime());
+        m_timer->DecrementPeriodIfElapsed();
+    }
 }
 
 //----------------------------------------------------------------------------------------------------

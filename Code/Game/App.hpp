@@ -4,10 +4,12 @@
 
 //----------------------------------------------------------------------------------------------------
 #pragma once
+#include "Engine/Core/Clock.hpp"
 #include "Engine/Core/EventSystem.hpp"
+#include "Engine/Core/Timer.hpp"
 
+//-Forward-Declaration--------------------------------------------------------------------------------
 class Camera;
-//----------------------------------------------------------------------------------------------------
 class Game;
 
 //----------------------------------------------------------------------------------------------------
@@ -40,4 +42,5 @@ private:
     float m_timeLastFrameStart = 0.f;
 
     Camera* m_devConsoleCamera = nullptr;
+    Timer* m_timer =nullptr;
 };
