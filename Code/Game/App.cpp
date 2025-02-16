@@ -38,6 +38,7 @@ void App::Startup()
     EventSystemConfig eventSystemConfig;
     g_theEventSystem = new EventSystem(eventSystemConfig);
     g_theEventSystem->SubscribeEventCallbackFunction("WM_CLOSE", OnWindowClose);
+    g_theEventSystem->SubscribeEventCallbackFunction("WM_KEYDOWN", Event_KeyPressed);
     g_theEventSystem->SubscribeEventCallbackFunction("quit", OnWindowClose);
 
     InputSystemConfig inputConfig;
@@ -80,10 +81,7 @@ void App::Startup()
     g_theRNG        = new RandomNumberGenerator();
     g_theGame       = new Game();
 
-    Clock::GetSystemClock();
     m_timer = new Timer(1.0f);
-    Clock::TickSystemClock();
-    m_timer->Start();
 }
 
 //----------------------------------------------------------------------------------------------------
@@ -130,22 +128,11 @@ void App::RunFrame()
     float const deltaSeconds = timeNow - m_timeLastFrameStart;
     m_timeLastFrameStart     = timeNow;
 
-
-    // DebuggerPrintf("DeltaSecond: %f\n", Clock::GetSystemClock().GetDeltaSeconds());
-
-
-    // DebuggerPrintf("TimeNow = %.06f\n", timeNow);
-
     BeginFrame();         // Engine pre-frame stuff
-    // DebuggerPrintf("TotalSecond: %f\n", Clock::GetSystemClock().GetTotalSeconds());
     Update(deltaSeconds); // Game updates / moves / spawns / hurts / kills stuff
-
-
-    // DebuggerPrintf("m_timer->GetElapsedTime: %f\n", m_timer->GetElapsedTime());
 
     if (m_timer->HasPeriodElapsed())
     {
-        // DebuggerPrintf("SystemClock %f\n", m_timer->GetElapsedTime());
         m_timer->DecrementPeriodIfElapsed();
     }
 
@@ -175,6 +162,36 @@ STATIC bool App::OnWindowClose(EventArgs& args)
 }
 
 //----------------------------------------------------------------------------------------------------
+bool App::Event_KeyPressed(EventArgs& args)
+{
+    if (g_theDevConsole->IsOpen() == true)
+    {
+        return false;
+    }
+
+    int const           value   = args.GetValue("WM_KEYDOWN", -1);
+    unsigned char const keyCode = static_cast<unsigned char>(value);
+
+    if (keyCode == KEYCODE_ESC)
+    {
+        switch (g_theGame->IsAttractMode() == true)
+        {
+        case true:
+            RequestQuit();
+
+            break;
+
+        case false:
+            g_theApp->DeleteAndCreateNewGame();
+
+            break;
+        }
+    }
+
+    return true;
+}
+
+//----------------------------------------------------------------------------------------------------
 STATIC void App::RequestQuit()
 {
     m_isQuitting = true;
@@ -183,8 +200,7 @@ STATIC void App::RequestQuit()
 //----------------------------------------------------------------------------------------------------
 void App::BeginFrame() const
 {
-    Clock::TickSystemClock();
-
+    m_timer->Start();
 
     g_theEventSystem->BeginFrame();
     g_theInput->BeginFrame();
@@ -238,6 +254,11 @@ void App::EndFrame() const
 //----------------------------------------------------------------------------------------------------
 void App::HandleKeyPressed()
 {
+    if (g_theDevConsole->IsOpen() == true)
+    {
+        return;
+    }
+
     XboxController const& controller = g_theInput->GetController(0);
 
     if (g_theInput->WasKeyJustPressed(KEYCODE_ESC) || controller.WasButtonJustPressed(XBOX_BUTTON_BACK))
@@ -245,7 +266,7 @@ void App::HandleKeyPressed()
         switch (g_theGame->IsAttractMode())
         {
         case true:
-            m_isQuitting = true;
+            // m_isQuitting = true;
 
             break;
 

@@ -4,7 +4,6 @@
 
 //----------------------------------------------------------------------------------------------------
 #pragma once
-#include "Engine/Core/Clock.hpp"
 #include "Engine/Core/EventSystem.hpp"
 #include "Engine/Core/Timer.hpp"
 
@@ -25,6 +24,7 @@ public:
     void RunMainLoop();
 
     static bool OnWindowClose(EventArgs& args);
+    static bool Event_KeyPressed(EventArgs& args);
     static void RequestQuit();
     static bool m_isQuitting;
 

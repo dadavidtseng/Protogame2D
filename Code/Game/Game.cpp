@@ -42,10 +42,10 @@ void Game::Update(float deltaSeconds)
     UpdateFromController();
     AdjustForPauseAndTimeDistortion(deltaSeconds);
 
-    if (g_theInput->WasKeyJustPressed(KEYCODE_TILDE))
-    {
-        g_theDevConsole->ToggleMode(OPEN_FULL);
-    }
+    // if (g_theInput->WasKeyJustPressed(KEYCODE_TILDE))
+    // {
+    //     g_theDevConsole->ToggleMode(OPEN_FULL);
+    // }
 
     // if (g_theInput->WasKeyJustPressed(KEYCODE_ENTER))
     // {
@@ -55,7 +55,7 @@ void Game::Update(float deltaSeconds)
 
     if (m_timer->HasPeriodElapsed())
     {
-        DebuggerPrintf("GameClock: %f\n", m_timer->GetElapsedTime());
+        // DebuggerPrintf("GameClock: %f\n", m_timer->GetElapsedTime());
         m_timer->DecrementPeriodIfElapsed();
     }
 }
@@ -67,21 +67,17 @@ void Game::Render() const
 
     m_isAttractMode ? RenderAttractMode() : RenderUI();
 
-    // TestDevConsole();
-
     g_theRenderer->EndCamera(*m_screenCamera);
-}
-
-void Game::TestDevConsole() const
-{
-    AABB2 const box = AABB2(Vec2::ZERO, Vec2(1600.f, 30.f));
-
-    g_theDevConsole->Render(box);
 }
 
 //----------------------------------------------------------------------------------------------------
 void Game::UpdateFromKeyBoard()
 {
+    if (g_theDevConsole->IsOpen() == true)
+    {
+        return;
+    }
+
     if (g_theInput->WasKeyJustPressed(KEYCODE_SPACE))
     {
         m_isAttractMode          = false;

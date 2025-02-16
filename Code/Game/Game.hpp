@@ -20,7 +20,6 @@ public:
     void Update(float deltaSeconds);
     void Render() const;
     bool IsAttractMode() const { return m_isAttractMode; }
-    void TestDevConsole() const;
 
 private:
     void UpdateFromKeyBoard();
