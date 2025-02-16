@@ -164,7 +164,7 @@ bool App::Event_KeyPressed(EventArgs& args)
 
     if (keyCode == KEYCODE_ESC)
     {
-        switch (g_theGame->IsAttractMode() == true)
+        switch (g_theGame->IsAttractMode())
         {
         case true:
             RequestQuit();
