@@ -30,17 +30,13 @@ public:
 
 private:
     void BeginFrame() const;
-    void Update(float deltaSeconds);
+    void Update();
     void Render() const;
     void EndFrame() const;
-
-    void HandleKeyPressed();
-    void HandleKeyReleased();
 
     void DeleteAndCreateNewGame();
 
     float m_timeLastFrameStart = 0.f;
 
     Camera* m_devConsoleCamera = nullptr;
-    Timer* m_timer =nullptr;
 };

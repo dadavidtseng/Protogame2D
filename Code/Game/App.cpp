@@ -5,28 +5,25 @@
 //----------------------------------------------------------------------------------------------------
 #include "Game/App.hpp"
 
-#include "GameCommon.hpp"
 #include "Engine/Audio/AudioSystem.hpp"
 #include "Engine/Core/DevConsole.hpp"
 #include "Engine/Core/EngineCommon.hpp"
-#include "Engine/Core/ErrorWarningAssert.hpp"
-#include "Engine/Core/Time.hpp"
 #include "Engine/Input/InputSystem.hpp"
 #include "Engine/Math/RandomNumberGenerator.hpp"
 #include "Engine/Renderer/BitmapFont.hpp"
 #include "Engine/Renderer/Renderer.hpp"
 #include "Engine/Renderer/Window.hpp"
 #include "Game/Game.hpp"
+#include "Game/GameCommon.hpp"
 
 //----------------------------------------------------------------------------------------------------
-App*         g_theApp        = nullptr;       // Created and owned by Main_Windows.cpp
-AudioSystem* g_theAudio      = nullptr;       // Created and owned by the App
-BitmapFont*  g_theBitmapFont = nullptr;       // Created and owned by the App
-Game*        g_theGame       = nullptr;       // Created and owned by the App
-// InputSystem*           g_theInput      = nullptr;       // Created and owned by the App
-Renderer*              g_theRenderer = nullptr;       // Created and owned by the App
-RandomNumberGenerator* g_theRNG      = nullptr;       // Created and owned by the App
-Window*                g_theWindow   = nullptr;       // Created and owned by the App
+App*                   g_theApp        = nullptr;       // Created and owned by Main_Windows.cpp
+AudioSystem*           g_theAudio      = nullptr;       // Created and owned by the App
+BitmapFont*            g_theBitmapFont = nullptr;       // Created and owned by the App
+Game*                  g_theGame       = nullptr;       // Created and owned by the App
+Renderer*              g_theRenderer   = nullptr;       // Created and owned by the App
+RandomNumberGenerator* g_theRNG        = nullptr;       // Created and owned by the App
+Window*                g_theWindow     = nullptr;       // Created and owned by the App
 
 //----------------------------------------------------------------------------------------------------
 STATIC bool App::m_isQuitting = false;
@@ -54,6 +51,7 @@ void App::Startup()
     renderConfig.m_window = g_theWindow;
     g_theRenderer         = new Renderer(renderConfig);
 
+    // Initialize devConsoleCamera
     m_devConsoleCamera = new Camera();
 
     Vec2 const bottomLeft     = Vec2::ZERO;
@@ -80,8 +78,6 @@ void App::Startup()
     g_theBitmapFont = g_theRenderer->CreateOrGetBitmapFontFromFile("Data/Fonts/SquirrelFixedFont"); // DO NOT SPECIFY FILE .EXTENSION!!  (Important later on.)
     g_theRNG        = new RandomNumberGenerator();
     g_theGame       = new Game();
-
-    m_timer = new Timer(1.0f);
 }
 
 //----------------------------------------------------------------------------------------------------
@@ -89,6 +85,7 @@ void App::Startup()
 //
 void App::Shutdown()
 {
+    // Destroy all Engine Subsystem
     delete g_theGame;
     g_theGame = nullptr;
 
@@ -100,12 +97,15 @@ void App::Shutdown()
 
     g_theAudio->Shutdown();
     g_theDevConsole->Shutdown();
+
+    delete m_devConsoleCamera;
+    m_devConsoleCamera = nullptr;
+
     g_theRenderer->Shutdown();
     g_theWindow->Shutdown();
     g_theInput->Shutdown();
     g_theEventSystem->Shutdown();
 
-    // Destroy all Engine Subsystem
     delete g_theAudio;
     g_theAudio = nullptr;
 
@@ -124,18 +124,8 @@ void App::Shutdown()
 //
 void App::RunFrame()
 {
-    float const timeNow      = static_cast<float>(GetCurrentTimeSeconds());
-    float const deltaSeconds = timeNow - m_timeLastFrameStart;
-    m_timeLastFrameStart     = timeNow;
-
     BeginFrame();         // Engine pre-frame stuff
-    Update(deltaSeconds); // Game updates / moves / spawns / hurts / kills stuff
-
-    if (m_timer->HasPeriodElapsed())
-    {
-        m_timer->DecrementPeriodIfElapsed();
-    }
-
+    Update(); // Game updates / moves / spawns / hurts / kills stuff
     Render();             // Game draws current state of things
     EndFrame();           // Engine post-frame stuff
 }
@@ -200,8 +190,6 @@ STATIC void App::RequestQuit()
 //----------------------------------------------------------------------------------------------------
 void App::BeginFrame() const
 {
-    m_timer->Start();
-
     g_theEventSystem->BeginFrame();
     g_theInput->BeginFrame();
     g_theWindow->BeginFrame();
@@ -212,13 +200,11 @@ void App::BeginFrame() const
 }
 
 //----------------------------------------------------------------------------------------------------
-void App::Update(float const deltaSeconds)
+void App::Update()
 {
     Clock::TickSystemClock();
 
-    HandleKeyPressed();
-    HandleKeyReleased();
-    g_theGame->Update(deltaSeconds);
+    g_theGame->Update();
 }
 
 //----------------------------------------------------------------------------------------------------
@@ -249,41 +235,6 @@ void App::EndFrame() const
     g_theRenderer->EndFrame();
     g_theDevConsole->EndFrame();
     g_theAudio->EndFrame();
-}
-
-//----------------------------------------------------------------------------------------------------
-void App::HandleKeyPressed()
-{
-    if (g_theDevConsole->IsOpen() == true)
-    {
-        return;
-    }
-
-    XboxController const& controller = g_theInput->GetController(0);
-
-    if (g_theInput->WasKeyJustPressed(KEYCODE_ESC) || controller.WasButtonJustPressed(XBOX_BUTTON_BACK))
-    {
-        switch (g_theGame->IsAttractMode())
-        {
-        case true:
-            // m_isQuitting = true;
-
-            break;
-
-        case false:
-            DeleteAndCreateNewGame();
-
-            break;
-        }
-    }
-}
-
-//----------------------------------------------------------------------------------------------------
-void App::HandleKeyReleased()
-{
-    XboxController const& controller = g_theInput->GetController(0);
-
-    UNUSED(controller)
 }
 
 //----------------------------------------------------------------------------------------------------

@@ -6,11 +6,9 @@
 #include "Game/Game.hpp"
 
 #include "Engine/Audio/AudioSystem.hpp"
-#include "Engine/Core/Clock.hpp"
 #include "Engine/Core/DevConsole.hpp"
 #include "Engine/Core/EngineCommon.hpp"
 #include "Engine/Core/ErrorWarningAssert.hpp"
-#include "Engine/Core/SimpleTriangleFont.hpp"
 #include "Engine/Input/InputSystem.hpp"
 #include "Engine/Renderer/Renderer.hpp"
 #include "Game/GameCommon.hpp"
@@ -24,40 +22,15 @@ Game::Game()
     Vec2 const screenTopRight = Vec2(SCREEN_SIZE_X, SCREEN_SIZE_Y);
 
     m_screenCamera->SetOrthoView(bottomLeft, screenTopRight);
-
-    m_clock = new Clock(Clock::GetSystemClock());
-    m_timer = new Timer(2.f, m_clock);
-    Clock::TickSystemClock();
-    m_timer->Start();
 }
 
 //----------------------------------------------------------------------------------------------------
-void Game::Update(float deltaSeconds)
+void Game::Update()
 {
-    UNUSED(deltaSeconds)
-
-
     // #TODO: Select keyboard or controller
     UpdateFromKeyBoard();
     UpdateFromController();
-    AdjustForPauseAndTimeDistortion(deltaSeconds);
-
-    // if (g_theInput->WasKeyJustPressed(KEYCODE_TILDE))
-    // {
-    //     g_theDevConsole->ToggleMode(OPEN_FULL);
-    // }
-
-    // if (g_theInput->WasKeyJustPressed(KEYCODE_ENTER))
-    // {
-    //     g_theDevConsole->AddLine(DevConsole::INFO_MAJOR, "SHO  OT");
-    //     g_theDevConsole->Execute("help a=b");
-    // }
-
-    if (m_timer->HasPeriodElapsed())
-    {
-        // DebuggerPrintf("GameClock: %f\n", m_timer->GetElapsedTime());
-        m_timer->DecrementPeriodIfElapsed();
-    }
+    AdjustForPauseAndTimeDistortion();
 }
 
 //----------------------------------------------------------------------------------------------------
@@ -102,9 +75,8 @@ void Game::UpdateFromController()
 }
 
 //----------------------------------------------------------------------------------------------------
-void Game::AdjustForPauseAndTimeDistortion(float& deltaSeconds)
+void Game::AdjustForPauseAndTimeDistortion()
 {
-    UNUSED(deltaSeconds)
 }
 
 //----------------------------------------------------------------------------------------------------
