@@ -5,13 +5,13 @@
 //-----------------------------------------------------------------------------------------------
 #pragma once
 
-class BitmapFont;
 //-----------------------------------------------------------------------------------------------
 struct Rgba8;
 struct Vec2;
 class App;
 class AudioSystem;
-class InputSystem;
+class BitmapFont;
+class Game;
 class Renderer;
 class RandomNumberGenerator;
 
@@ -19,7 +19,7 @@ class RandomNumberGenerator;
 extern App*                   g_theApp;
 extern AudioSystem*           g_theAudio;
 extern BitmapFont*            g_theBitmapFont;
-// extern InputSystem*           g_theInput;
+extern Game*                  g_theGame;
 extern Renderer*              g_theRenderer;
 extern RandomNumberGenerator* g_theRNG;
 

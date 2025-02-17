@@ -46,7 +46,7 @@ void Game::Render() const
 //----------------------------------------------------------------------------------------------------
 void Game::UpdateFromKeyBoard()
 {
-    if (g_theDevConsole->IsOpen() == true)
+    if (m_isDevConsoleMode == true)
     {
         return;
     }
@@ -54,6 +54,7 @@ void Game::UpdateFromKeyBoard()
     if (g_theInput->WasKeyJustPressed(KEYCODE_SPACE))
     {
         m_isAttractMode          = false;
+        m_isDevConsoleMode       = true;
         SoundID const clickSound = g_theAudio->CreateOrGetSound("Data/Audio/TestSound.mp3");
         g_theAudio->StartSound(clickSound, false, 1.f, 0.f, 0.5f);
     }

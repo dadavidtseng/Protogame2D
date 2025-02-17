@@ -4,6 +4,7 @@
 
 //----------------------------------------------------------------------------------------------------
 #pragma once
+#include "Engine/Core/EventSystem.hpp"
 
 //----------------------------------------------------------------------------------------------------
 class Camera;
@@ -26,6 +27,7 @@ private:
     void RenderAttractMode() const;
     void RenderUI() const;
 
-    Camera* m_screenCamera  = nullptr;
-    bool    m_isAttractMode = true;
+    Camera* m_screenCamera     = nullptr;
+    bool    m_isAttractMode    = true;
+    bool    m_isDevConsoleMode = false;
 };

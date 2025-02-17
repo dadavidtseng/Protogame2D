@@ -6,6 +6,7 @@
 #include "Game/App.hpp"
 
 #include "Engine/Audio/AudioSystem.hpp"
+#include "Engine/Core/Clock.hpp"
 #include "Engine/Core/DevConsole.hpp"
 #include "Engine/Core/EngineCommon.hpp"
 #include "Engine/Input/InputSystem.hpp"
@@ -96,6 +97,7 @@ void App::Shutdown()
     g_theBitmapFont = nullptr;
 
     g_theAudio->Shutdown();
+    g_theInput->Shutdown();
     g_theDevConsole->Shutdown();
 
     delete m_devConsoleCamera;
@@ -103,7 +105,6 @@ void App::Shutdown()
 
     g_theRenderer->Shutdown();
     g_theWindow->Shutdown();
-    g_theInput->Shutdown();
     g_theEventSystem->Shutdown();
 
     delete g_theAudio;

@@ -5,7 +5,6 @@
 //----------------------------------------------------------------------------------------------------
 #pragma once
 #include "Engine/Core/EventSystem.hpp"
-#include "Engine/Core/Timer.hpp"
 
 //-Forward-Declaration--------------------------------------------------------------------------------
 class Camera;
@@ -35,8 +34,6 @@ private:
     void EndFrame() const;
 
     void DeleteAndCreateNewGame();
-
-    float m_timeLastFrameStart = 0.f;
 
     Camera* m_devConsoleCamera = nullptr;
 };
