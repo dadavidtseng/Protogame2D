@@ -5,6 +5,7 @@
 //----------------------------------------------------------------------------------------------------
 #pragma once
 #include "Engine/Core/EventSystem.hpp"
+#include "Engine/Core/Timer.hpp"
 
 //-Forward-Declaration--------------------------------------------------------------------------------
 class Camera;

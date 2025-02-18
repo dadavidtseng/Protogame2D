@@ -125,10 +125,10 @@ void App::Shutdown()
 //
 void App::RunFrame()
 {
-    BeginFrame();         // Engine pre-frame stuff
-    Update(); // Game updates / moves / spawns / hurts / kills stuff
-    Render();             // Game draws current state of things
-    EndFrame();           // Engine post-frame stuff
+    BeginFrame();   // Engine pre-frame stuff
+    Update();       // Game updates / moves / spawns / hurts / kills stuff
+    Render();       // Game draws current state of things
+    EndFrame();     // Engine post-frame stuff
 }
 
 //----------------------------------------------------------------------------------------------------
