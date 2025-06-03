@@ -7,7 +7,10 @@
 #include "Game/GameCommon.hpp"
 
 //-----------------------------------------------------------------------------------------------
-int WINAPI WinMain(HINSTANCE const applicationInstanceHandle, HINSTANCE, LPSTR const commandLineString, int)
+int WINAPI WinMain(HINSTANCE const applicationInstanceHandle,
+                   HINSTANCE,
+                   LPSTR const commandLineString,
+                   int)
 {
     UNUSED(applicationInstanceHandle)
     UNUSED(commandLineString)

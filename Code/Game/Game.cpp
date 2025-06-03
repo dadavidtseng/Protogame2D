@@ -19,7 +19,7 @@ Game::Game()
     Vec2 const bottomLeft     = Vec2::ZERO;
     Vec2 const screenTopRight = Vec2(SCREEN_SIZE_X, SCREEN_SIZE_Y);
 
-    m_screenCamera->SetOrthoView(bottomLeft, screenTopRight);
+    m_screenCamera->SetOrthoGraphicView(bottomLeft, screenTopRight);
 }
 
 //----------------------------------------------------------------------------------------------------
@@ -53,14 +53,14 @@ void Game::UpdateFromKeyBoard()
     {
         m_isAttractMode          = false;
         m_isDevConsoleMode       = true;
-        SoundID const clickSound = g_theAudio->CreateOrGetSound("Data/Audio/TestSound.mp3");
+        SoundID const clickSound = g_theAudio->CreateOrGetSound("Data/Audio/TestSound.mp3", AudioSystemSoundDimension::Sound2D);
         g_theAudio->StartSound(clickSound, false, 1.f, 0.f, 0.5f);
     }
 
     if (g_theInput->WasKeyJustPressed(KEYCODE_ESC))
     {
         m_isAttractMode          = true;
-        SoundID const clickSound = g_theAudio->CreateOrGetSound("Data/Audio/TestSound.mp3");
+        SoundID const clickSound = g_theAudio->CreateOrGetSound("Data/Audio/TestSound.mp3", AudioSystemSoundDimension::Sound2D);
         g_theAudio->StartSound(clickSound);
     }
 }

@@ -48,7 +48,7 @@ void App::Startup()
     windowConfig.m_windowTitle = "Protogame2D";
     g_theWindow                = new Window(windowConfig);
 
-    RenderConfig renderConfig;
+    sRenderConfig renderConfig;
     renderConfig.m_window = g_theWindow;
     g_theRenderer         = new Renderer(renderConfig);
 
@@ -58,9 +58,9 @@ void App::Startup()
     Vec2 const bottomLeft     = Vec2::ZERO;
     Vec2 const screenTopRight = Vec2(SCREEN_SIZE_X, SCREEN_SIZE_Y);
 
-    m_devConsoleCamera->SetOrthoView(bottomLeft, screenTopRight);
+    m_devConsoleCamera->SetOrthoGraphicView(bottomLeft, screenTopRight);
 
-    DevConsoleConfig devConsoleConfig;
+    sDevConsoleConfig devConsoleConfig;
     devConsoleConfig.m_defaultRenderer = g_theRenderer;
     devConsoleConfig.m_defaultFontName = "SquirrelFixedFont";
     devConsoleConfig.m_defaultCamera   = m_devConsoleCamera;
