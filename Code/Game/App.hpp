@@ -24,7 +24,6 @@ public:
     void RunMainLoop();
 
     static bool OnWindowClose(EventArgs& args);
-    static bool Event_KeyPressed(EventArgs& args);
     static void RequestQuit();
     static bool m_isQuitting;
 
@@ -33,8 +32,7 @@ private:
     void Update();
     void Render() const;
     void EndFrame() const;
-
-    void DeleteAndCreateNewGame();
+    void UpdateCursorMode();
 
     Camera* m_devConsoleCamera = nullptr;
 };

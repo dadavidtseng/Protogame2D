@@ -4,29 +4,43 @@
 
 //----------------------------------------------------------------------------------------------------
 #pragma once
+#include <cstdint>
+
+#include "Engine/Core/EventSystem.hpp"
 
 //----------------------------------------------------------------------------------------------------
 class Camera;
+class Clock;
+
+//----------------------------------------------------------------------------------------------------
+enum class eGameState : int8_t
+{
+    ATTRACT,
+    GAME
+};
 
 //----------------------------------------------------------------------------------------------------
 class Game
 {
 public:
     Game();
-    ~Game() = default;
+    ~Game();
 
-    void Update();
-    void Render() const;
-    bool IsAttractMode() const { return m_isAttractMode; }
+    void        Update();
+    void        Render() const;
+
+    static bool OnGameStateChanged(EventArgs& args);
+
+    eGameState GetCurrentGameState() const;
+    void       ChangeGameState(eGameState newGameState);
 
 private:
-    void UpdateFromKeyBoard();
-    void UpdateFromController();
-    void AdjustForPauseAndTimeDistortion();
+    void UpdateFromInput();
+    void AdjustForPauseAndTimeDistortion() const;
     void RenderAttractMode() const;
-    void RenderUI() const;
+    void RenderGame() const;
 
-    Camera* m_screenCamera     = nullptr;
-    bool    m_isAttractMode    = true;
-    bool    m_isDevConsoleMode = false;
+    Camera*    m_screenCamera = nullptr;
+    eGameState m_gameState    = eGameState::ATTRACT;
+    Clock*     m_gameClock    = nullptr;
 };

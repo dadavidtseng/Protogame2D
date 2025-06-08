@@ -12,6 +12,7 @@
 #include "Engine/Input/InputSystem.hpp"
 #include "Engine/Math/RandomNumberGenerator.hpp"
 #include "Engine/Renderer/BitmapFont.hpp"
+#include "Engine/Renderer/DebugRenderSystem.hpp"
 #include "Engine/Renderer/Renderer.hpp"
 #include "Engine/Renderer/Window.hpp"
 #include "Game/Game.hpp"
@@ -30,29 +31,54 @@ Window*                g_theWindow     = nullptr;       // Created and owned by 
 STATIC bool App::m_isQuitting = false;
 
 //----------------------------------------------------------------------------------------------------
+/// @brief
+/// Create all engine subsystems in a specific order.
 void App::Startup()
 {
-    // Create All Engine Subsystems
-    EventSystemConfig eventSystemConfig;
+    //-Start-of-EventSystem---------------------------------------------------------------------------
+
+    EventSystemConfig constexpr eventSystemConfig;
     g_theEventSystem = new EventSystem(eventSystemConfig);
-    g_theEventSystem->SubscribeEventCallbackFunction("WM_CLOSE", OnWindowClose);
-    g_theEventSystem->SubscribeEventCallbackFunction("WM_KEYDOWN", Event_KeyPressed);
+    g_theEventSystem->SubscribeEventCallbackFunction("OnCloseButtonClicked", OnWindowClose);
     g_theEventSystem->SubscribeEventCallbackFunction("quit", OnWindowClose);
 
-    InputSystemConfig inputConfig;
+    //-End-of-EventSystem-----------------------------------------------------------------------------
+    //------------------------------------------------------------------------------------------------
+    //-Start-of-InputSystem---------------------------------------------------------------------------
+
+    InputSystemConfig constexpr inputConfig;
     g_theInput = new InputSystem(inputConfig);
+
+    //-End-of-InputSystem-----------------------------------------------------------------------------
+    //------------------------------------------------------------------------------------------------
+    //-Start-of-Window--------------------------------------------------------------------------------
 
     WindowConfig windowConfig;
     windowConfig.m_aspectRatio = 2.f;
     windowConfig.m_inputSystem = g_theInput;
-    windowConfig.m_windowTitle = "Protogame2D";
+    windowConfig.m_windowTitle = "FirstMultipleWindows";
     g_theWindow                = new Window(windowConfig);
+
+    //-End-of-Window----------------------------------------------------------------------------------
+    //------------------------------------------------------------------------------------------------
+    //-Start-of-Renderer------------------------------------------------------------------------------
 
     sRenderConfig renderConfig;
     renderConfig.m_window = g_theWindow;
     g_theRenderer         = new Renderer(renderConfig);
 
-    // Initialize devConsoleCamera
+    //-End-of-Renderer--------------------------------------------------------------------------------
+    //------------------------------------------------------------------------------------------------
+    //-Start-of-DebugRender---------------------------------------------------------------------------
+
+    sDebugRenderConfig debugConfig;
+    debugConfig.m_renderer = g_theRenderer;
+    debugConfig.m_fontName = "SquirrelFixedFont";
+
+    //-End-of-DebugRender-----------------------------------------------------------------------------
+    //------------------------------------------------------------------------------------------------
+    //-Start-of-DevConsole----------------------------------------------------------------------------
+
     m_devConsoleCamera = new Camera();
 
     Vec2 const bottomLeft     = Vec2::ZERO;
@@ -66,12 +92,19 @@ void App::Startup()
     devConsoleConfig.m_defaultCamera   = m_devConsoleCamera;
     g_theDevConsole                    = new DevConsole(devConsoleConfig);
 
-    AudioSystemConfig audioConfig;
+    //-End-of-DevConsole------------------------------------------------------------------------------
+    //------------------------------------------------------------------------------------------------
+    //-Start-of-AudioSystem---------------------------------------------------------------------------
+
+    AudioSystemConfig constexpr audioConfig;
     g_theAudio = new AudioSystem(audioConfig);
+
+    //-End-of-AudioSystem-----------------------------------------------------------------------------
 
     g_theEventSystem->Startup();
     g_theWindow->Startup();
     g_theRenderer->Startup();
+    DebugRenderSystemStartup(debugConfig);
     g_theDevConsole->StartUp();
     g_theInput->Startup();
     g_theAudio->Startup();
@@ -87,37 +120,25 @@ void App::Startup()
 void App::Shutdown()
 {
     // Destroy all Engine Subsystem
-    delete g_theGame;
-    g_theGame = nullptr;
-
-    delete g_theRNG;
-    g_theRNG = nullptr;
-
-    delete g_theBitmapFont;
-    g_theBitmapFont = nullptr;
+    SafeDeletePointer(g_theGame);
+    SafeDeletePointer(g_theRNG);
+    SafeDeletePointer(g_theBitmapFont);
 
     g_theAudio->Shutdown();
     g_theInput->Shutdown();
     g_theDevConsole->Shutdown();
 
-    delete m_devConsoleCamera;
-    m_devConsoleCamera = nullptr;
+    SafeDeletePointer(m_devConsoleCamera);
 
+    DebugRenderSystemShutdown();
     g_theRenderer->Shutdown();
     g_theWindow->Shutdown();
     g_theEventSystem->Shutdown();
 
-    delete g_theAudio;
-    g_theAudio = nullptr;
-
-    delete g_theRenderer;
-    g_theRenderer = nullptr;
-
-    delete g_theWindow;
-    g_theWindow = nullptr;
-
-    delete g_theInput;
-    g_theInput = nullptr;
+    SafeDeletePointer(g_theAudio);
+    SafeDeletePointer(g_theRenderer);
+    SafeDeletePointer(g_theWindow);
+    SafeDeletePointer(g_theInput);
 }
 
 //----------------------------------------------------------------------------------------------------
@@ -153,36 +174,6 @@ STATIC bool App::OnWindowClose(EventArgs& args)
 }
 
 //----------------------------------------------------------------------------------------------------
-bool App::Event_KeyPressed(EventArgs& args)
-{
-    if (g_theDevConsole->IsOpen() == true)
-    {
-        return false;
-    }
-
-    int const           value   = args.GetValue("WM_KEYDOWN", -1);
-    unsigned char const keyCode = static_cast<unsigned char>(value);
-
-    if (keyCode == KEYCODE_ESC)
-    {
-        switch (g_theGame->IsAttractMode())
-        {
-        case true:
-            RequestQuit();
-
-            break;
-
-        case false:
-            g_theApp->DeleteAndCreateNewGame();
-
-            break;
-        }
-    }
-
-    return true;
-}
-
-//----------------------------------------------------------------------------------------------------
 STATIC void App::RequestQuit()
 {
     m_isQuitting = true;
@@ -192,12 +183,12 @@ STATIC void App::RequestQuit()
 void App::BeginFrame() const
 {
     g_theEventSystem->BeginFrame();
-    g_theInput->BeginFrame();
     g_theWindow->BeginFrame();
     g_theRenderer->BeginFrame();
+    DebugRenderBeginFrame();
     g_theDevConsole->BeginFrame();
+    g_theInput->BeginFrame();
     g_theAudio->BeginFrame();
-    // g_theNetwork->BeginFrame();
 }
 
 //----------------------------------------------------------------------------------------------------
@@ -205,6 +196,7 @@ void App::Update()
 {
     Clock::TickSystemClock();
 
+    UpdateCursorMode();
     g_theGame->Update();
 }
 
@@ -217,7 +209,7 @@ void App::Update()
 //
 void App::Render() const
 {
-    Rgba8 const clearColor = Rgba8::MAGENTA;
+    Rgba8 const clearColor = Rgba8::BLACK;
 
     g_theRenderer->ClearScreen(clearColor);
     g_theGame->Render();
@@ -231,18 +223,27 @@ void App::Render() const
 void App::EndFrame() const
 {
     g_theEventSystem->EndFrame();
-    g_theInput->EndFrame();
     g_theWindow->EndFrame();
     g_theRenderer->EndFrame();
+    DebugRenderEndFrame();
     g_theDevConsole->EndFrame();
+    g_theInput->EndFrame();
     g_theAudio->EndFrame();
 }
 
 //----------------------------------------------------------------------------------------------------
-void App::DeleteAndCreateNewGame()
+void App::UpdateCursorMode()
 {
-    delete g_theGame;
-    g_theGame = nullptr;
+    bool const doesWindowHasFocus   = GetActiveWindow() == g_theWindow->GetWindowHandle();
+    bool const isAttractState       = g_theGame->GetCurrentGameState() == eGameState::ATTRACT;
+    bool const shouldUsePointerMode = !doesWindowHasFocus || g_theDevConsole->IsOpen() || isAttractState;
 
-    g_theGame = new Game();
+    if (shouldUsePointerMode == true)
+    {
+        g_theInput->SetCursorMode(CursorMode::POINTER);
+    }
+    else
+    {
+        g_theInput->SetCursorMode(CursorMode::FPS);
+    }
 }
