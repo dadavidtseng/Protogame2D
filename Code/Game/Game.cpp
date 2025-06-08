@@ -74,12 +74,12 @@ bool Game::OnGameStateChanged(EventArgs& args)
 
     if (newGameState == "ATTRACT")
     {
-        SoundID const clickSound = g_theAudio->CreateOrGetSound("Data/Audio/TestSound.mp3", AudioSystemSoundDimension::Sound2D);
+        SoundID const clickSound = g_theAudio->CreateOrGetSound("Data/Audio/TestSound.mp3", eAudioSystemSoundDimension::Sound2D);
         g_theAudio->StartSound(clickSound);
     }
     else if (newGameState == "GAME")
     {
-        SoundID const clickSound = g_theAudio->CreateOrGetSound("Data/Audio/TestSound.mp3", AudioSystemSoundDimension::Sound2D);
+        SoundID const clickSound = g_theAudio->CreateOrGetSound("Data/Audio/TestSound.mp3", eAudioSystemSoundDimension::Sound2D);
         g_theAudio->StartSound(clickSound, false, 1.f, 0.f, 0.5f);
     }
 

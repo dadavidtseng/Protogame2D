@@ -37,7 +37,7 @@ void App::Startup()
 {
     //-Start-of-EventSystem---------------------------------------------------------------------------
 
-    EventSystemConfig constexpr eventSystemConfig;
+    sEventSystemConfig constexpr eventSystemConfig;
     g_theEventSystem = new EventSystem(eventSystemConfig);
     g_theEventSystem->SubscribeEventCallbackFunction("OnCloseButtonClicked", OnWindowClose);
     g_theEventSystem->SubscribeEventCallbackFunction("quit", OnWindowClose);
@@ -46,14 +46,14 @@ void App::Startup()
     //------------------------------------------------------------------------------------------------
     //-Start-of-InputSystem---------------------------------------------------------------------------
 
-    InputSystemConfig constexpr inputConfig;
+    sInputSystemConfig constexpr inputConfig;
     g_theInput = new InputSystem(inputConfig);
 
     //-End-of-InputSystem-----------------------------------------------------------------------------
     //------------------------------------------------------------------------------------------------
     //-Start-of-Window--------------------------------------------------------------------------------
 
-    WindowConfig windowConfig;
+    sWindowConfig windowConfig;
     windowConfig.m_aspectRatio = 2.f;
     windowConfig.m_inputSystem = g_theInput;
     windowConfig.m_windowTitle = "FirstMultipleWindows";
@@ -96,7 +96,7 @@ void App::Startup()
     //------------------------------------------------------------------------------------------------
     //-Start-of-AudioSystem---------------------------------------------------------------------------
 
-    AudioSystemConfig constexpr audioConfig;
+    sAudioSystemConfig constexpr audioConfig;
     g_theAudio = new AudioSystem(audioConfig);
 
     //-End-of-AudioSystem-----------------------------------------------------------------------------
