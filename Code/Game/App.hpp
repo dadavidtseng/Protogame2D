@@ -5,7 +5,6 @@
 //----------------------------------------------------------------------------------------------------
 #pragma once
 #include "Engine/Core/EventSystem.hpp"
-#include "Engine/Core/Timer.hpp"
 
 //-Forward-Declaration--------------------------------------------------------------------------------
 class Camera;
@@ -32,7 +31,8 @@ private:
     void Update();
     void Render() const;
     void EndFrame() const;
-    void UpdateCursorMode();
+
+    void UpdateCursorMode() const;
 
     Camera* m_devConsoleCamera = nullptr;
 };

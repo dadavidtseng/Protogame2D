@@ -11,10 +11,10 @@
 #include "Engine/Core/EngineCommon.hpp"
 #include "Engine/Input/InputSystem.hpp"
 #include "Engine/Math/RandomNumberGenerator.hpp"
+#include "Engine/Platform/Window.hpp"
 #include "Engine/Renderer/BitmapFont.hpp"
 #include "Engine/Renderer/DebugRenderSystem.hpp"
 #include "Engine/Renderer/Renderer.hpp"
-#include "Engine/Renderer/Window.hpp"
 #include "Game/Game.hpp"
 #include "Game/GameCommon.hpp"
 
@@ -232,18 +232,12 @@ void App::EndFrame() const
 }
 
 //----------------------------------------------------------------------------------------------------
-void App::UpdateCursorMode()
+void App::UpdateCursorMode() const
 {
-    bool const doesWindowHasFocus   = GetActiveWindow() == g_theWindow->GetWindowHandle();
-    bool const isAttractState       = g_theGame->GetCurrentGameState() == eGameState::ATTRACT;
-    bool const shouldUsePointerMode = !doesWindowHasFocus || g_theDevConsole->IsOpen() || isAttractState;
+    bool const        doesWindowHasFocus   = GetActiveWindow() == g_theWindow->GetWindowHandle();
+    bool const        isAttractState       = g_theGame->GetCurrentGameState() == eGameState::ATTRACT;
+    bool const        shouldUsePointerMode = !doesWindowHasFocus || g_theDevConsole->IsOpen() || isAttractState;
+    eCursorMode const mode                 = shouldUsePointerMode ? eCursorMode::POINTER : eCursorMode::FPS;
 
-    if (shouldUsePointerMode == true)
-    {
-        g_theInput->SetCursorMode(CursorMode::POINTER);
-    }
-    else
-    {
-        g_theInput->SetCursorMode(CursorMode::FPS);
-    }
+    g_theInput->SetCursorMode(mode);
 }
