@@ -6,8 +6,10 @@
 #include "Game/Game.hpp"
 
 #include "Engine/Audio/AudioSystem.hpp"
+#include "Engine/Core/Clock.hpp"
 #include "Engine/Core/EngineCommon.hpp"
 #include "Engine/Input/InputSystem.hpp"
+#include "Engine/Platform/Window.hpp"
 #include "Engine/Renderer/DebugRenderSystem.hpp"
 #include "Engine/Renderer/Renderer.hpp"
 #include "Game/App.hpp"
@@ -21,7 +23,7 @@ Game::Game()
     m_screenCamera = new Camera();
 
     Vec2 const bottomLeft     = Vec2::ZERO;
-    Vec2 const screenTopRight = Vec2(SCREEN_SIZE_X, SCREEN_SIZE_Y);
+    Vec2 const screenTopRight = Window::s_mainWindow->GetClientDimensions();
 
     m_screenCamera->SetOrthoGraphicView(bottomLeft, screenTopRight);
     m_screenCamera->SetNormalizedViewport(AABB2::ZERO_TO_ONE);
@@ -32,7 +34,7 @@ Game::Game()
 //----------------------------------------------------------------------------------------------------
 Game::~Game()
 {
-    SafeDeletePointer(m_screenCamera);
+    GAME_SAFE_RELEASE(m_screenCamera);
 }
 
 //----------------------------------------------------------------------------------------------------
@@ -47,7 +49,7 @@ void Game::Update()
 void Game::Render() const
 {
     //-Start-of-Screen-Camera-------------------------------------------------------------------------
-    g_theRenderer->BeginCamera(*m_screenCamera);
+    g_renderer->BeginCamera(*m_screenCamera);
 
     if (m_gameState == eGameState::ATTRACT)
     {
@@ -58,7 +60,7 @@ void Game::Render() const
         RenderGame();
     }
 
-    g_theRenderer->EndCamera(*m_screenCamera);
+    g_renderer->EndCamera(*m_screenCamera);
     //-End-of-Screen-Camera---------------------------------------------------------------------------
 
     if (m_gameState == eGameState::GAME)
@@ -74,13 +76,13 @@ bool Game::OnGameStateChanged(EventArgs& args)
 
     if (newGameState == "ATTRACT")
     {
-        SoundID const clickSound = g_theAudio->CreateOrGetSound("Data/Audio/TestSound.mp3", eAudioSystemSoundDimension::Sound2D);
-        g_theAudio->StartSound(clickSound);
+        SoundID const clickSound = g_audio->CreateOrGetSound("Data/Audio/TestSound.mp3", eAudioSystemSoundDimension::Sound2D);
+        g_audio->StartSound(clickSound);
     }
     else if (newGameState == "GAME")
     {
-        SoundID const clickSound = g_theAudio->CreateOrGetSound("Data/Audio/TestSound.mp3", eAudioSystemSoundDimension::Sound2D);
-        g_theAudio->StartSound(clickSound, false, 1.f, 0.f, 0.5f);
+        SoundID const clickSound = g_audio->CreateOrGetSound("Data/Audio/TestSound.mp3", eAudioSystemSoundDimension::Sound2D);
+        g_audio->StartSound(clickSound, false, 1.f, 0.f, 0.5f);
     }
 
     return true;
@@ -112,6 +114,12 @@ void Game::UpdateFromInput()
 {
     if (m_gameState == eGameState::ATTRACT)
     {
+        if (g_theInput->WasKeyJustPressed(KEYCODE_R))
+        {
+            Window::s_mainWindow->SetWindowType(eWindowType::FULLSCREEN_STRETCH);
+            Window::s_mainWindow->ReconfigureWindow();
+        }
+
         if (g_theInput->WasKeyJustPressed(KEYCODE_ESC))
         {
             App::RequestQuit();
@@ -134,36 +142,50 @@ void Game::UpdateFromInput()
 //----------------------------------------------------------------------------------------------------
 void Game::AdjustForPauseAndTimeDistortion() const
 {
-    if (g_theInput->WasKeyJustPressed(KEYCODE_P))
-    {
-        m_gameClock->TogglePause();
-    }
-
-    if (g_theInput->WasKeyJustPressed(KEYCODE_O))
-    {
-        m_gameClock->StepSingleFrame();
-    }
-
-    if (g_theInput->IsKeyDown(KEYCODE_T))
-    {
-        m_gameClock->SetTimeScale(0.1f);
-    }
-
-    if (g_theInput->WasKeyJustReleased(KEYCODE_T))
-    {
-        m_gameClock->SetTimeScale(1.f);
-    }
+    if (g_theInput->WasKeyJustPressed(KEYCODE_P)) m_gameClock->TogglePause();
+    else if (g_theInput->WasKeyJustPressed(KEYCODE_O)) m_gameClock->StepSingleFrame();
+    else if (g_theInput->IsKeyDown(KEYCODE_T)) m_gameClock->SetTimeScale(0.1f);
+    else if (g_theInput->WasKeyJustReleased(KEYCODE_T)) m_gameClock->SetTimeScale(1.f);
 }
 
 //----------------------------------------------------------------------------------------------------
 void Game::RenderAttractMode() const
 {
-    DebugDrawRing(Vec2(800.f, 400.f), 300.f, 10.f, Rgba8(255, 127, 0));
+    Vec2 const clientDimensions = Window::s_mainWindow->GetClientDimensions();
+
+    VertexList_PCU verts;
+    AddVertsForDisc2D(verts, Vec2(clientDimensions.x * 0.5f, clientDimensions.y * 0.5f), 300.f, 10.f, Rgba8::YELLOW);
+    g_renderer->SetModelConstants();
+    g_renderer->SetBlendMode(eBlendMode::OPAQUE);
+    g_renderer->SetRasterizerMode(eRasterizerMode::SOLID_CULL_BACK);
+    g_renderer->SetSamplerMode(eSamplerMode::BILINEAR_CLAMP);
+    g_renderer->SetDepthMode(eDepthMode::DISABLED);
+    g_renderer->BindTexture(nullptr);
+    g_renderer->BindShader(g_renderer->CreateOrGetShaderFromFile("Data/Shaders/Default"));
+    g_renderer->DrawVertexArray(verts);
 }
 
 //----------------------------------------------------------------------------------------------------
 void Game::RenderGame() const
 {
-    DebugDrawLine(Vec2(100.f, 100.f), Vec2(1500.f, 700.f), 10.f, Rgba8(100, 200, 100));
-    DebugDrawLine(Vec2(1500.f, 100.f), Vec2(100.f, 700.f), 10.f, Rgba8(100, 200, 100));
+    Vec2 const clientDimensions = Window::s_mainWindow->GetClientDimensions();
+    Vec2 const offsetFromCorner = Vec2(200.f, 100.f);
+    Vec2 const topRight         = clientDimensions - offsetFromCorner;
+    Vec2 const bottomLeft       = offsetFromCorner;
+    Vec2 const topLeft          = Vec2(offsetFromCorner.x, clientDimensions.y - offsetFromCorner.y);
+    Vec2 const bottomRight      = Vec2(clientDimensions.x - offsetFromCorner.x, offsetFromCorner.y);
+
+    VertexList_PCU verts;
+
+    AddVertsForLineSegment2D(verts, topRight, bottomLeft, 10.f, false, Rgba8::GREEN);
+    AddVertsForLineSegment2D(verts, topLeft, bottomRight, 10.f, false, Rgba8::GREEN);
+
+    g_renderer->SetModelConstants();
+    g_renderer->SetBlendMode(eBlendMode::OPAQUE);
+    g_renderer->SetRasterizerMode(eRasterizerMode::SOLID_CULL_BACK);
+    g_renderer->SetSamplerMode(eSamplerMode::BILINEAR_CLAMP);
+    g_renderer->SetDepthMode(eDepthMode::DISABLED);
+    g_renderer->BindTexture(nullptr);
+    g_renderer->BindShader(g_renderer->CreateOrGetShaderFromFile("Data/Shaders/Default"));
+    g_renderer->DrawVertexArray(verts);
 }

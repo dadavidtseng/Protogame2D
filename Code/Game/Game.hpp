@@ -26,21 +26,20 @@ public:
     Game();
     ~Game();
 
-    void        Update();
-    void        Render() const;
-
-    static bool OnGameStateChanged(EventArgs& args);
+    void Update();
+    void Render() const;
 
     eGameState GetCurrentGameState() const;
     void       ChangeGameState(eGameState newGameState);
 
 private:
-    void UpdateFromInput();
-    void AdjustForPauseAndTimeDistortion() const;
-    void RenderAttractMode() const;
-    void RenderGame() const;
+    static bool OnGameStateChanged(EventArgs& args);
+    void        UpdateFromInput();
+    void        AdjustForPauseAndTimeDistortion() const;
+    void        RenderAttractMode() const;
+    void        RenderGame() const;
 
-    Camera*    m_screenCamera = nullptr;
     eGameState m_gameState    = eGameState::ATTRACT;
+    Camera*    m_screenCamera = nullptr;
     Clock*     m_gameClock    = nullptr;
 };
