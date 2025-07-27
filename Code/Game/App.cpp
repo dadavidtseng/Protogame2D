@@ -24,8 +24,8 @@ AudioSystem*           g_audio      = nullptr;       // Created and owned by the
 BitmapFont*            g_bitmapFont = nullptr;       // Created and owned by the App
 Game*                  g_game       = nullptr;       // Created and owned by the App
 Renderer*              g_renderer   = nullptr;       // Created and owned by the App
-RandomNumberGenerator* g_theRNG     = nullptr;       // Created and owned by the App
-Window*                g_theWindow  = nullptr;       // Created and owned by the App
+RandomNumberGenerator* g_rng     = nullptr;       // Created and owned by the App
+Window*                g_window  = nullptr;       // Created and owned by the App
 
 //----------------------------------------------------------------------------------------------------
 STATIC bool App::m_isQuitting = false;
@@ -46,8 +46,8 @@ void App::Startup()
     //------------------------------------------------------------------------------------------------
     //-Start-of-InputSystem---------------------------------------------------------------------------
 
-    sInputSystemConfig constexpr sInputConfig;
-    g_theInput = new InputSystem(sInputConfig);
+    sInputSystemConfig constexpr sInputSystemConfig;
+    g_theInput = new InputSystem(sInputSystemConfig);
 
     //-End-of-InputSystem-----------------------------------------------------------------------------
     //------------------------------------------------------------------------------------------------
@@ -58,23 +58,23 @@ void App::Startup()
     sWindowConfig.m_aspectRatio = 2.f;
     sWindowConfig.m_inputSystem = g_theInput;
     sWindowConfig.m_windowTitle = "Protogame2D";
-    g_theWindow                 = new Window(sWindowConfig);
+    g_window                 = new Window(sWindowConfig);
 
     //-End-of-Window----------------------------------------------------------------------------------
     //------------------------------------------------------------------------------------------------
     //-Start-of-Renderer------------------------------------------------------------------------------
 
     sRendererConfig sRendererConfig;
-    sRendererConfig.m_window = g_theWindow;
+    sRendererConfig.m_window = g_window;
     g_renderer               = new Renderer(sRendererConfig);
 
     //-End-of-Renderer--------------------------------------------------------------------------------
     //------------------------------------------------------------------------------------------------
     //-Start-of-DebugRender---------------------------------------------------------------------------
 
-    sDebugRenderConfig sDebugConfig;
-    sDebugConfig.m_renderer = g_renderer;
-    sDebugConfig.m_fontName = "SquirrelFixedFont";
+    sDebugRenderConfig sDebugRenderConfig;
+    sDebugRenderConfig.m_renderer = g_renderer;
+    sDebugRenderConfig.m_fontName = "SquirrelFixedFont";
 
     //-End-of-DebugRender-----------------------------------------------------------------------------
     //------------------------------------------------------------------------------------------------
@@ -97,21 +97,21 @@ void App::Startup()
     //------------------------------------------------------------------------------------------------
     //-Start-of-AudioSystem---------------------------------------------------------------------------
 
-    sAudioSystemConfig constexpr sAudioConfig;
-    g_audio = new AudioSystem(sAudioConfig);
+    sAudioSystemConfig constexpr sAudioSystemConfig;
+    g_audio = new AudioSystem(sAudioSystemConfig);
 
     //-End-of-AudioSystem-----------------------------------------------------------------------------
 
     g_theEventSystem->Startup();
-    g_theWindow->Startup();
+    g_window->Startup();
     g_renderer->Startup();
-    DebugRenderSystemStartup(sDebugConfig);
+    DebugRenderSystemStartup(sDebugRenderConfig);
     g_theDevConsole->StartUp();
     g_theInput->Startup();
     g_audio->Startup();
 
     g_bitmapFont = g_renderer->CreateOrGetBitmapFontFromFile("Data/Fonts/SquirrelFixedFont"); // DO NOT SPECIFY FILE .EXTENSION!!  (Important later on.)
-    g_theRNG     = new RandomNumberGenerator();
+    g_rng     = new RandomNumberGenerator();
     g_game       = new Game();
 }
 
@@ -122,7 +122,7 @@ void App::Shutdown()
 {
     // Destroy all Engine Subsystem
     GAME_SAFE_RELEASE(g_game);
-    GAME_SAFE_RELEASE(g_theRNG);
+    GAME_SAFE_RELEASE(g_rng);
     GAME_SAFE_RELEASE(g_bitmapFont);
 
     g_audio->Shutdown();
@@ -133,12 +133,12 @@ void App::Shutdown()
 
     DebugRenderSystemShutdown();
     g_renderer->Shutdown();
-    g_theWindow->Shutdown();
+    g_window->Shutdown();
     g_theEventSystem->Shutdown();
 
     GAME_SAFE_RELEASE(g_audio);
     GAME_SAFE_RELEASE(g_renderer);
-    GAME_SAFE_RELEASE(g_theWindow);
+    GAME_SAFE_RELEASE(g_window);
     GAME_SAFE_RELEASE(g_theInput);
 }
 
@@ -184,7 +184,7 @@ STATIC void App::RequestQuit()
 void App::BeginFrame() const
 {
     g_theEventSystem->BeginFrame();
-    g_theWindow->BeginFrame();
+    g_window->BeginFrame();
     g_renderer->BeginFrame();
     DebugRenderBeginFrame();
     g_theDevConsole->BeginFrame();
@@ -224,7 +224,7 @@ void App::Render() const
 void App::EndFrame() const
 {
     g_theEventSystem->EndFrame();
-    g_theWindow->EndFrame();
+    g_window->EndFrame();
     g_renderer->EndFrame();
     DebugRenderEndFrame();
     g_theDevConsole->EndFrame();
@@ -235,7 +235,7 @@ void App::EndFrame() const
 //----------------------------------------------------------------------------------------------------
 void App::UpdateCursorMode() const
 {
-    bool const        doesWindowHasFocus   = GetActiveWindow() == g_theWindow->GetWindowHandle();
+    bool const        doesWindowHasFocus   = GetActiveWindow() == g_window->GetWindowHandle();
     bool const        isAttractState       = g_game->GetCurrentGameState() == eGameState::ATTRACT;
     bool const        shouldUsePointerMode = !doesWindowHasFocus || g_theDevConsole->IsOpen() || isAttractState;
     eCursorMode const mode                 = shouldUsePointerMode ? eCursorMode::POINTER : eCursorMode::FPS;
