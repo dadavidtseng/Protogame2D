@@ -24,8 +24,8 @@ AudioSystem*           g_audio      = nullptr;       // Created and owned by the
 BitmapFont*            g_bitmapFont = nullptr;       // Created and owned by the App
 Game*                  g_game       = nullptr;       // Created and owned by the App
 Renderer*              g_renderer   = nullptr;       // Created and owned by the App
-RandomNumberGenerator* g_rng     = nullptr;       // Created and owned by the App
-Window*                g_window  = nullptr;       // Created and owned by the App
+RandomNumberGenerator* g_rng        = nullptr;       // Created and owned by the App
+Window*                g_window     = nullptr;       // Created and owned by the App
 
 //----------------------------------------------------------------------------------------------------
 STATIC bool App::m_isQuitting = false;
@@ -58,7 +58,7 @@ void App::Startup()
     sWindowConfig.m_aspectRatio = 2.f;
     sWindowConfig.m_inputSystem = g_theInput;
     sWindowConfig.m_windowTitle = "Protogame2D";
-    g_window                 = new Window(sWindowConfig);
+    g_window                    = new Window(sWindowConfig);
 
     //-End-of-Window----------------------------------------------------------------------------------
     //------------------------------------------------------------------------------------------------
@@ -74,7 +74,7 @@ void App::Startup()
 
     sDebugRenderConfig sDebugRenderConfig;
     sDebugRenderConfig.m_renderer = g_renderer;
-    sDebugRenderConfig.m_fontName = "SquirrelFixedFont";
+    sDebugRenderConfig.m_fontName = "DaemonFont";
 
     //-End-of-DebugRender-----------------------------------------------------------------------------
     //------------------------------------------------------------------------------------------------
@@ -89,7 +89,7 @@ void App::Startup()
 
     sDevConsoleConfig sDevConsoleConfig;
     sDevConsoleConfig.m_defaultRenderer = g_renderer;
-    sDevConsoleConfig.m_defaultFontName = "SquirrelFixedFont";
+    sDevConsoleConfig.m_defaultFontName = "DaemonFont";
     sDevConsoleConfig.m_defaultCamera   = m_devConsoleCamera;
     g_theDevConsole                     = new DevConsole(sDevConsoleConfig);
 
@@ -110,8 +110,8 @@ void App::Startup()
     g_theInput->Startup();
     g_audio->Startup();
 
-    g_bitmapFont = g_renderer->CreateOrGetBitmapFontFromFile("Data/Fonts/SquirrelFixedFont"); // DO NOT SPECIFY FILE .EXTENSION!!  (Important later on.)
-    g_rng     = new RandomNumberGenerator();
+    g_bitmapFont = g_renderer->CreateOrGetBitmapFontFromFile("Data/Fonts/DaemonFont"); // DO NOT SPECIFY FILE .EXTENSION!!  (Important later on.)
+    g_rng        = new RandomNumberGenerator();
     g_game       = new Game();
 }
 
