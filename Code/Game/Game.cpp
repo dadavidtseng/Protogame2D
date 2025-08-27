@@ -18,7 +18,7 @@
 //----------------------------------------------------------------------------------------------------
 Game::Game()
 {
-    g_theEventSystem->SubscribeEventCallbackFunction("OnGameStateChanged", OnGameStateChanged);
+    g_eventSystem->SubscribeEventCallbackFunction("OnGameStateChanged", OnGameStateChanged);
 
     m_screenCamera = new Camera();
 
@@ -106,7 +106,7 @@ void Game::ChangeGameState(eGameState const newGameState)
 
     m_gameState = newGameState;
 
-    g_theEventSystem->FireEvent("OnGameStateChanged", args);
+    g_eventSystem->FireEvent("OnGameStateChanged", args);
 }
 
 //----------------------------------------------------------------------------------------------------
@@ -114,25 +114,25 @@ void Game::UpdateFromInput()
 {
     if (m_gameState == eGameState::ATTRACT)
     {
-        if (g_theInput->WasKeyJustPressed(KEYCODE_R))
+        if (g_input->WasKeyJustPressed(KEYCODE_R))
         {
             Window::s_mainWindow->SetWindowType(eWindowType::FULLSCREEN_STRETCH);
             Window::s_mainWindow->ReconfigureWindow();
         }
 
-        if (g_theInput->WasKeyJustPressed(KEYCODE_ESC))
+        if (g_input->WasKeyJustPressed(KEYCODE_ESC))
         {
             App::RequestQuit();
         }
 
-        if (g_theInput->WasKeyJustPressed(KEYCODE_SPACE))
+        if (g_input->WasKeyJustPressed(KEYCODE_SPACE))
         {
             ChangeGameState(eGameState::GAME);
         }
     }
     else if (m_gameState == eGameState::GAME)
     {
-        if (g_theInput->WasKeyJustPressed(KEYCODE_ESC))
+        if (g_input->WasKeyJustPressed(KEYCODE_ESC))
         {
             ChangeGameState(eGameState::ATTRACT);
         }
@@ -142,10 +142,10 @@ void Game::UpdateFromInput()
 //----------------------------------------------------------------------------------------------------
 void Game::AdjustForPauseAndTimeDistortion() const
 {
-    if (g_theInput->WasKeyJustPressed(KEYCODE_P)) m_gameClock->TogglePause();
-    else if (g_theInput->WasKeyJustPressed(KEYCODE_O)) m_gameClock->StepSingleFrame();
-    else if (g_theInput->IsKeyDown(KEYCODE_T)) m_gameClock->SetTimeScale(0.1f);
-    else if (g_theInput->WasKeyJustReleased(KEYCODE_T)) m_gameClock->SetTimeScale(1.f);
+    if (g_input->WasKeyJustPressed(KEYCODE_P)) m_gameClock->TogglePause();
+    else if (g_input->WasKeyJustPressed(KEYCODE_O)) m_gameClock->StepSingleFrame();
+    else if (g_input->IsKeyDown(KEYCODE_T)) m_gameClock->SetTimeScale(0.1f);
+    else if (g_input->WasKeyJustReleased(KEYCODE_T)) m_gameClock->SetTimeScale(1.f);
 }
 
 //----------------------------------------------------------------------------------------------------

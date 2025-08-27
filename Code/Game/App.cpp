@@ -38,16 +38,16 @@ void App::Startup()
     //-Start-of-EventSystem---------------------------------------------------------------------------
 
     sEventSystemConfig constexpr sEventSystemConfig;
-    g_theEventSystem = new EventSystem(sEventSystemConfig);
-    g_theEventSystem->SubscribeEventCallbackFunction("OnCloseButtonClicked", OnWindowClose);
-    g_theEventSystem->SubscribeEventCallbackFunction("quit", OnWindowClose);
+    g_eventSystem = new EventSystem(sEventSystemConfig);
+    g_eventSystem->SubscribeEventCallbackFunction("OnCloseButtonClicked", OnWindowClose);
+    g_eventSystem->SubscribeEventCallbackFunction("quit", OnWindowClose);
 
     //-End-of-EventSystem-----------------------------------------------------------------------------
     //------------------------------------------------------------------------------------------------
     //-Start-of-InputSystem---------------------------------------------------------------------------
 
     sInputSystemConfig constexpr sInputSystemConfig;
-    g_theInput = new InputSystem(sInputSystemConfig);
+    g_input = new InputSystem(sInputSystemConfig);
 
     //-End-of-InputSystem-----------------------------------------------------------------------------
     //------------------------------------------------------------------------------------------------
@@ -56,7 +56,7 @@ void App::Startup()
     sWindowConfig sWindowConfig;
     sWindowConfig.m_windowType  = eWindowType::WINDOWED;
     sWindowConfig.m_aspectRatio = 2.f;
-    sWindowConfig.m_inputSystem = g_theInput;
+    sWindowConfig.m_inputSystem = g_input;
     sWindowConfig.m_windowTitle = "Protogame2D";
     g_window                    = new Window(sWindowConfig);
 
@@ -91,7 +91,7 @@ void App::Startup()
     sDevConsoleConfig.m_defaultRenderer = g_renderer;
     sDevConsoleConfig.m_defaultFontName = "DaemonFont";
     sDevConsoleConfig.m_defaultCamera   = m_devConsoleCamera;
-    g_theDevConsole                     = new DevConsole(sDevConsoleConfig);
+    g_devConsole                     = new DevConsole(sDevConsoleConfig);
 
     //-End-of-DevConsole------------------------------------------------------------------------------
     //------------------------------------------------------------------------------------------------
@@ -102,12 +102,12 @@ void App::Startup()
 
     //-End-of-AudioSystem-----------------------------------------------------------------------------
 
-    g_theEventSystem->Startup();
+    g_eventSystem->Startup();
     g_window->Startup();
     g_renderer->Startup();
     DebugRenderSystemStartup(sDebugRenderConfig);
-    g_theDevConsole->StartUp();
-    g_theInput->Startup();
+    g_devConsole->StartUp();
+    g_input->Startup();
     g_audio->Startup();
 
     g_bitmapFont = g_renderer->CreateOrGetBitmapFontFromFile("Data/Fonts/DaemonFont"); // DO NOT SPECIFY FILE .EXTENSION!!  (Important later on.)
@@ -126,20 +126,20 @@ void App::Shutdown()
     GAME_SAFE_RELEASE(g_bitmapFont);
 
     g_audio->Shutdown();
-    g_theInput->Shutdown();
-    g_theDevConsole->Shutdown();
+    g_input->Shutdown();
+    g_devConsole->Shutdown();
 
     GAME_SAFE_RELEASE(m_devConsoleCamera);
 
     DebugRenderSystemShutdown();
     g_renderer->Shutdown();
     g_window->Shutdown();
-    g_theEventSystem->Shutdown();
+    g_eventSystem->Shutdown();
 
     GAME_SAFE_RELEASE(g_audio);
     GAME_SAFE_RELEASE(g_renderer);
     GAME_SAFE_RELEASE(g_window);
-    GAME_SAFE_RELEASE(g_theInput);
+    GAME_SAFE_RELEASE(g_input);
 }
 
 //----------------------------------------------------------------------------------------------------
@@ -183,12 +183,12 @@ STATIC void App::RequestQuit()
 //----------------------------------------------------------------------------------------------------
 void App::BeginFrame() const
 {
-    g_theEventSystem->BeginFrame();
+    g_eventSystem->BeginFrame();
     g_window->BeginFrame();
     g_renderer->BeginFrame();
     DebugRenderBeginFrame();
-    g_theDevConsole->BeginFrame();
-    g_theInput->BeginFrame();
+    g_devConsole->BeginFrame();
+    g_input->BeginFrame();
     g_audio->BeginFrame();
 }
 
@@ -217,18 +217,18 @@ void App::Render() const
 
     AABB2 const box = AABB2(Vec2::ZERO, Vec2(1600.f, 30.f));
 
-    g_theDevConsole->Render(box);
+    g_devConsole->Render(box);
 }
 
 //----------------------------------------------------------------------------------------------------
 void App::EndFrame() const
 {
-    g_theEventSystem->EndFrame();
+    g_eventSystem->EndFrame();
     g_window->EndFrame();
     g_renderer->EndFrame();
     DebugRenderEndFrame();
-    g_theDevConsole->EndFrame();
-    g_theInput->EndFrame();
+    g_devConsole->EndFrame();
+    g_input->EndFrame();
     g_audio->EndFrame();
 }
 
@@ -237,8 +237,8 @@ void App::UpdateCursorMode() const
 {
     bool const        doesWindowHasFocus   = GetActiveWindow() == g_window->GetWindowHandle();
     bool const        isAttractState       = g_game->GetCurrentGameState() == eGameState::ATTRACT;
-    bool const        shouldUsePointerMode = !doesWindowHasFocus || g_theDevConsole->IsOpen() || isAttractState;
+    bool const        shouldUsePointerMode = !doesWindowHasFocus || g_devConsole->IsOpen() || isAttractState;
     eCursorMode const mode                 = shouldUsePointerMode ? eCursorMode::POINTER : eCursorMode::FPS;
 
-    g_theInput->SetCursorMode(mode);
+    g_input->SetCursorMode(mode);
 }
