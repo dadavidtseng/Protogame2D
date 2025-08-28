@@ -31,16 +31,14 @@ Window*                g_window     = nullptr;       // Created and owned by the
 STATIC bool App::m_isQuitting = false;
 
 //----------------------------------------------------------------------------------------------------
-/// @brief
-/// Create all engine subsystems in a specific order.
-void App::Startup()
+App::App()
 {
     //-Start-of-EventSystem---------------------------------------------------------------------------
 
     sEventSystemConfig constexpr sEventSystemConfig;
     g_eventSystem = new EventSystem(sEventSystemConfig);
-    g_eventSystem->SubscribeEventCallbackFunction("OnCloseButtonClicked", OnWindowClose);
-    g_eventSystem->SubscribeEventCallbackFunction("quit", OnWindowClose);
+    g_eventSystem->SubscribeEventCallbackFunction("OnCloseButtonClicked", OnCloseButtonClicked);
+    g_eventSystem->SubscribeEventCallbackFunction("quit", OnCloseButtonClicked);
 
     //-End-of-EventSystem-----------------------------------------------------------------------------
     //------------------------------------------------------------------------------------------------
@@ -53,12 +51,12 @@ void App::Startup()
     //------------------------------------------------------------------------------------------------
     //-Start-of-Window--------------------------------------------------------------------------------
 
-    sWindowConfig sWindowConfig;
-    sWindowConfig.m_windowType  = eWindowType::WINDOWED;
-    sWindowConfig.m_aspectRatio = 2.f;
-    sWindowConfig.m_inputSystem = g_input;
-    sWindowConfig.m_windowTitle = "Protogame2D";
-    g_window                    = new Window(sWindowConfig);
+    sWindowConfig windowConfig;
+    windowConfig.m_windowType  = eWindowType::WINDOWED;
+    windowConfig.m_aspectRatio = 2.f;
+    windowConfig.m_inputSystem = g_input;
+    windowConfig.m_windowTitle = "Protogame3D";
+    g_window                   = new Window(windowConfig);
 
     //-End-of-Window----------------------------------------------------------------------------------
     //------------------------------------------------------------------------------------------------
@@ -70,28 +68,14 @@ void App::Startup()
 
     //-End-of-Renderer--------------------------------------------------------------------------------
     //------------------------------------------------------------------------------------------------
-    //-Start-of-DebugRender---------------------------------------------------------------------------
-
-    sDebugRenderConfig sDebugRenderConfig;
-    sDebugRenderConfig.m_renderer = g_renderer;
-    sDebugRenderConfig.m_fontName = "DaemonFont";
-
-    //-End-of-DebugRender-----------------------------------------------------------------------------
-    //------------------------------------------------------------------------------------------------
     //-Start-of-DevConsole----------------------------------------------------------------------------
-
-    m_devConsoleCamera = new Camera();
-
-    Vec2 const bottomLeft     = Vec2::ZERO;
-    Vec2 const screenTopRight = Window::s_mainWindow->GetClientDimensions();
-
-    m_devConsoleCamera->SetOrthoGraphicView(bottomLeft, screenTopRight);
 
     sDevConsoleConfig sDevConsoleConfig;
     sDevConsoleConfig.m_defaultRenderer = g_renderer;
     sDevConsoleConfig.m_defaultFontName = "DaemonFont";
+    m_devConsoleCamera                  = new Camera();
     sDevConsoleConfig.m_defaultCamera   = m_devConsoleCamera;
-    g_devConsole                     = new DevConsole(sDevConsoleConfig);
+    g_devConsole                        = new DevConsole(sDevConsoleConfig);
 
     //-End-of-DevConsole------------------------------------------------------------------------------
     //------------------------------------------------------------------------------------------------
@@ -101,6 +85,33 @@ void App::Startup()
     g_audio = new AudioSystem(sAudioSystemConfig);
 
     //-End-of-AudioSystem-----------------------------------------------------------------------------
+}
+
+//----------------------------------------------------------------------------------------------------
+App::~App()
+{
+    GAME_SAFE_RELEASE(g_game);
+    GAME_SAFE_RELEASE(g_rng);
+    GAME_SAFE_RELEASE(g_bitmapFont);
+    GAME_SAFE_RELEASE(m_devConsoleCamera);
+    GAME_SAFE_RELEASE(g_audio);
+    GAME_SAFE_RELEASE(g_renderer);
+    GAME_SAFE_RELEASE(g_window);
+    GAME_SAFE_RELEASE(g_input);
+}
+
+//----------------------------------------------------------------------------------------------------
+/// @brief
+/// Create all engine subsystems in a specific order.
+void App::Startup()
+{
+    //-Start-of-DebugRender---------------------------------------------------------------------------
+
+    sDebugRenderConfig sDebugRenderConfig;
+    sDebugRenderConfig.m_renderer = g_renderer;
+    sDebugRenderConfig.m_fontName = "DaemonFont";
+
+    //-End-of-DebugRender-----------------------------------------------------------------------------
 
     g_eventSystem->Startup();
     g_window->Startup();
@@ -120,37 +131,13 @@ void App::Startup()
 //
 void App::Shutdown()
 {
-    // Destroy all Engine Subsystem
-    GAME_SAFE_RELEASE(g_game);
-    GAME_SAFE_RELEASE(g_rng);
-    GAME_SAFE_RELEASE(g_bitmapFont);
-
     g_audio->Shutdown();
     g_input->Shutdown();
     g_devConsole->Shutdown();
-
-    GAME_SAFE_RELEASE(m_devConsoleCamera);
-
     DebugRenderSystemShutdown();
     g_renderer->Shutdown();
     g_window->Shutdown();
     g_eventSystem->Shutdown();
-
-    GAME_SAFE_RELEASE(g_audio);
-    GAME_SAFE_RELEASE(g_renderer);
-    GAME_SAFE_RELEASE(g_window);
-    GAME_SAFE_RELEASE(g_input);
-}
-
-//----------------------------------------------------------------------------------------------------
-// One "frame" of the game.  Generally: Input, Update, Render.  We call this 60+ times per second.
-//
-void App::RunFrame()
-{
-    BeginFrame();   // Engine pre-frame stuff
-    Update();       // Game updates / moves / spawns / hurts / kills stuff
-    Render();       // Game draws current state of things
-    EndFrame();     // Engine post-frame stuff
 }
 
 //----------------------------------------------------------------------------------------------------
@@ -165,13 +152,24 @@ void App::RunMainLoop()
 }
 
 //----------------------------------------------------------------------------------------------------
-STATIC bool App::OnWindowClose(EventArgs& args)
+// One "frame" of the game.  Generally: Input, Update, Render.  We call this 60+ times per second.
+//
+void App::RunFrame()
+{
+    BeginFrame();   // Engine pre-frame stuff
+    Update();       // Game updates / moves / spawns / hurts / kills stuff
+    Render();       // Game draws current state of things
+    EndFrame();     // Engine post-frame stuff
+}
+
+//----------------------------------------------------------------------------------------------------
+STATIC bool App::OnCloseButtonClicked(EventArgs& args)
 {
     UNUSED(args)
 
     RequestQuit();
 
-    return true;
+    return false;
 }
 
 //----------------------------------------------------------------------------------------------------
@@ -196,7 +194,6 @@ void App::BeginFrame() const
 void App::Update()
 {
     Clock::TickSystemClock();
-
     UpdateCursorMode();
     g_game->Update();
 }
@@ -233,7 +230,7 @@ void App::EndFrame() const
 }
 
 //----------------------------------------------------------------------------------------------------
-void App::UpdateCursorMode() const
+void App::UpdateCursorMode()
 {
     bool const        doesWindowHasFocus   = GetActiveWindow() == g_window->GetWindowHandle();
     bool const        isAttractState       = g_game->GetCurrentGameState() == eGameState::ATTRACT;
@@ -241,4 +238,11 @@ void App::UpdateCursorMode() const
     eCursorMode const mode                 = shouldUsePointerMode ? eCursorMode::POINTER : eCursorMode::FPS;
 
     g_input->SetCursorMode(mode);
+}
+
+//----------------------------------------------------------------------------------------------------
+void App::DeleteAndCreateNewGame()
+{
+    GAME_SAFE_RELEASE(g_game);
+    g_game = new Game();
 }

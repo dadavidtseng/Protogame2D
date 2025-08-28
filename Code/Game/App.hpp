@@ -8,21 +8,21 @@
 
 //-Forward-Declaration--------------------------------------------------------------------------------
 class Camera;
-class Game;
 
 //----------------------------------------------------------------------------------------------------
 class App
 {
 public:
-    App()  = default;
-    ~App() = default;
+    App();
+    ~App();
+
     void Startup();
     void Shutdown();
-    void RunFrame();
 
     void RunMainLoop();
+    void RunFrame();
 
-    static bool OnWindowClose(EventArgs& args);
+    static bool OnCloseButtonClicked(EventArgs& args);
     static void RequestQuit();
     static bool m_isQuitting;
 
@@ -32,7 +32,8 @@ private:
     void Render() const;
     void EndFrame() const;
 
-    void UpdateCursorMode() const;
+    void UpdateCursorMode();
+    void DeleteAndCreateNewGame();
 
     Camera* m_devConsoleCamera = nullptr;
 };
