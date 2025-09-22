@@ -2,6 +2,8 @@
 /.vs/
 /.qodo/
 /[Tt]emporary/
+.spec-workflow/
+.claude/
 
 # Prerequisites
 *.d
