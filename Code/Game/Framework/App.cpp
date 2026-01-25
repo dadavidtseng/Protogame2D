@@ -11,6 +11,7 @@
 #include "Engine/Audio/AudioSystem.hpp"
 #include "Engine/Core/Clock.hpp"
 #include "Engine/Core/DevConsole.hpp"
+#include "Engine/Core/Engine.hpp"
 #include "Engine/Core/EngineCommon.hpp"
 #include "Engine/Input/InputSystem.hpp"
 #include "Engine/Math/RandomNumberGenerator.hpp"
@@ -20,13 +21,13 @@
 
 //----------------------------------------------------------------------------------------------------
 App*                   g_app        = nullptr;       // Created and owned by Main_Windows.cpp
-AudioSystem*           g_audio      = nullptr;       // Created and owned by the App
-BitmapFont*            g_bitmapFont = nullptr;       // Created and owned by the App
+// AudioSystem*           g_audio      = nullptr;       // Created and owned by the App
+// BitmapFont*            g_bitmapFont = nullptr;       // Created and owned by the App
 Game*                  g_game       = nullptr;       // Created and owned by the App
-Renderer*              g_renderer   = nullptr;       // Created and owned by the App
-RandomNumberGenerator* g_rng        = nullptr;       // Created and owned by the App
-Window*                g_window     = nullptr;       // Created and owned by the App
-ResourceSubsystem*     g_resourceSubsystem = nullptr;       // Created and owned by the App
+// Renderer*              g_renderer   = nullptr;       // Created and owned by the App
+// RandomNumberGenerator* g_rng        = nullptr;       // Created and owned by the App
+// Window*                g_window     = nullptr;       // Created and owned by the App
+// ResourceSubsystem*     g_resourceSubsystem = nullptr;       // Created and owned by the App
 
 //----------------------------------------------------------------------------------------------------
 STATIC bool App::m_isQuitting = false;
@@ -34,77 +35,74 @@ STATIC bool App::m_isQuitting = false;
 //----------------------------------------------------------------------------------------------------
 App::App()
 {
-    //-Start-of-EventSystem---------------------------------------------------------------------------
+    GEngine::Get().Construct();
 
-    sEventSystemConfig constexpr sEventSystemConfig;
-    g_eventSystem = new EventSystem(sEventSystemConfig);
-    g_eventSystem->SubscribeEventCallbackFunction("OnCloseButtonClicked", OnCloseButtonClicked);
-    g_eventSystem->SubscribeEventCallbackFunction("quit", OnCloseButtonClicked);
-
-    //-End-of-EventSystem-----------------------------------------------------------------------------
-    //------------------------------------------------------------------------------------------------
-    //-Start-of-InputSystem---------------------------------------------------------------------------
-
-    sInputSystemConfig constexpr sInputSystemConfig;
-    g_input = new InputSystem(sInputSystemConfig);
-
-    //-End-of-InputSystem-----------------------------------------------------------------------------
-    //------------------------------------------------------------------------------------------------
-    //-Start-of-Window--------------------------------------------------------------------------------
-
-    sWindowConfig windowConfig;
-    windowConfig.m_windowType  = eWindowType::WINDOWED;
-    windowConfig.m_aspectRatio = 2.f;
-    windowConfig.m_inputSystem = g_input;
-    windowConfig.m_windowTitle = "Protogame2D";
-    g_window                   = new Window(windowConfig);
-
-    //-End-of-Window----------------------------------------------------------------------------------
-    //------------------------------------------------------------------------------------------------
-    //-Start-of-Renderer------------------------------------------------------------------------------
-
-    sRendererConfig sRendererConfig;
-    sRendererConfig.m_window = g_window;
-    g_renderer               = new Renderer(sRendererConfig);
-
-    //-End-of-Renderer--------------------------------------------------------------------------------
-    //------------------------------------------------------------------------------------------------
-    //-Start-of-DevConsole----------------------------------------------------------------------------
-
-    sDevConsoleConfig sDevConsoleConfig;
-    sDevConsoleConfig.m_defaultRenderer = g_renderer;
-    sDevConsoleConfig.m_defaultFontName = "DaemonFont";
-    m_devConsoleCamera                  = new Camera();
-    sDevConsoleConfig.m_defaultCamera   = m_devConsoleCamera;
-    g_devConsole                        = new DevConsole(sDevConsoleConfig);
-
-    //-End-of-DevConsole------------------------------------------------------------------------------
-    //------------------------------------------------------------------------------------------------
-    //-Start-of-AudioSystem---------------------------------------------------------------------------
-
-    sAudioSystemConfig constexpr sAudioSystemConfig;
-    g_audio = new AudioSystem(sAudioSystemConfig);
-
-    //-End-of-AudioSystem-----------------------------------------------------------------------------
-
-    sResourceSubsystemConfig resourceSubsystemConfig;
-    resourceSubsystemConfig.m_renderer = g_renderer;  // Pass renderer via config (new API)
-    resourceSubsystemConfig.m_threadCount = 4;
-
-    g_resourceSubsystem = new ResourceSubsystem(resourceSubsystemConfig);
+    // //-End-of-EventSystem-----------------------------------------------------------------------------
+    // //------------------------------------------------------------------------------------------------
+    // //-Start-of-InputSystem---------------------------------------------------------------------------
+    //
+    // sInputSystemConfig constexpr sInputSystemConfig;
+    // g_input = new InputSystem(sInputSystemConfig);
+    //
+    // //-End-of-InputSystem-----------------------------------------------------------------------------
+    // //------------------------------------------------------------------------------------------------
+    // //-Start-of-Window--------------------------------------------------------------------------------
+    //
+    // sWindowConfig windowConfig;
+    // windowConfig.m_windowType  = eWindowType::WINDOWED;
+    // windowConfig.m_aspectRatio = 2.f;
+    // windowConfig.m_inputSystem = g_input;
+    // windowConfig.m_windowTitle = "Protogame2D";
+    // g_window                   = new Window(windowConfig);
+    //
+    // //-End-of-Window----------------------------------------------------------------------------------
+    // //------------------------------------------------------------------------------------------------
+    // //-Start-of-Renderer------------------------------------------------------------------------------
+    //
+    // sRendererConfig sRendererConfig;
+    // sRendererConfig.m_window = g_window;
+    // g_renderer               = new Renderer(sRendererConfig);
+    //
+    // //-End-of-Renderer--------------------------------------------------------------------------------
+    // //------------------------------------------------------------------------------------------------
+    // //-Start-of-DevConsole----------------------------------------------------------------------------
+    //
+    // sDevConsoleConfig sDevConsoleConfig;
+    // sDevConsoleConfig.m_defaultRenderer = g_renderer;
+    // sDevConsoleConfig.m_defaultFontName = "DaemonFont";
+    // m_devConsoleCamera                  = new Camera();
+    // sDevConsoleConfig.m_defaultCamera   = m_devConsoleCamera;
+    // g_devConsole                        = new DevConsole(sDevConsoleConfig);
+    //
+    // //-End-of-DevConsole------------------------------------------------------------------------------
+    // //------------------------------------------------------------------------------------------------
+    // //-Start-of-AudioSystem---------------------------------------------------------------------------
+    //
+    // sAudioSystemConfig constexpr sAudioSystemConfig;
+    // g_audio = new AudioSystem(sAudioSystemConfig);
+    //
+    // //-End-of-AudioSystem-----------------------------------------------------------------------------
+    //
+    // sResourceSubsystemConfig resourceSubsystemConfig;
+    // resourceSubsystemConfig.m_renderer = g_renderer;  // Pass renderer via config (new API)
+    // resourceSubsystemConfig.m_threadCount = 4;
+    //
+    // g_resourceSubsystem = new ResourceSubsystem(resourceSubsystemConfig);
 }
 
 //----------------------------------------------------------------------------------------------------
 App::~App()
 {
-    GAME_SAFE_RELEASE(g_game);
-    GAME_SAFE_RELEASE(g_rng);
-    GAME_SAFE_RELEASE(g_bitmapFont);
-    GAME_SAFE_RELEASE(m_devConsoleCamera);
-    GAME_SAFE_RELEASE(g_audio);
-    GAME_SAFE_RELEASE(g_renderer);
-    GAME_SAFE_RELEASE(g_window);
-    GAME_SAFE_RELEASE(g_input);
+    GEngine::Get().Destruct();
+
+    // GAME_SAFE_RELEASE(g_game);
+    // GAME_SAFE_RELEASE(g_rng);
+    // GAME_SAFE_RELEASE(g_bitmapFont);
+    // GAME_SAFE_RELEASE(m_devConsoleCamera);
+    // GAME_SAFE_RELEASE(g_audio);
+    // GAME_SAFE_RELEASE(g_renderer);
+    // GAME_SAFE_RELEASE(g_window);
+    // GAME_SAFE_RELEASE(g_input);
 }
 
 //----------------------------------------------------------------------------------------------------
@@ -112,26 +110,31 @@ App::~App()
 /// Create all engine subsystems in a specific order.
 void App::Startup()
 {
-    //-Start-of-DebugRender---------------------------------------------------------------------------
+    GEngine::Get().Startup();
 
-    sDebugRenderConfig sDebugRenderConfig;
-    sDebugRenderConfig.m_renderer = g_renderer;
-    sDebugRenderConfig.m_fontName = "DaemonFont";
+    g_eventSystem->SubscribeEventCallbackFunction("OnCloseButtonClicked", OnCloseButtonClicked);
+    g_eventSystem->SubscribeEventCallbackFunction("quit", OnCloseButtonClicked);
 
-    //-End-of-DebugRender-----------------------------------------------------------------------------
+    // //-Start-of-DebugRender---------------------------------------------------------------------------
+    //
+    // sDebugRenderConfig sDebugRenderConfig;
+    // sDebugRenderConfig.m_renderer = g_renderer;
+    // sDebugRenderConfig.m_fontName = "DaemonFont";
+    //
+    // //-End-of-DebugRender-----------------------------------------------------------------------------
+    //
+    // g_eventSystem->Startup();
+    // g_window->Startup();
+    // g_renderer->Startup();
+    // g_resourceSubsystem->Startup();  // Use instance method instead of static Initialize()
+    // DebugRenderSystemStartup(sDebugRenderConfig);
+    // g_devConsole->StartUp();
+    // g_input->Startup();
+    // g_audio->Startup();
 
-    g_eventSystem->Startup();
-    g_window->Startup();
-    g_renderer->Startup();
-    g_resourceSubsystem->Startup();  // Use instance method instead of static Initialize()
-    DebugRenderSystemStartup(sDebugRenderConfig);
-    g_devConsole->StartUp();
-    g_input->Startup();
-    g_audio->Startup();
-
-    // g_bitmapFont = g_renderer->CreateOrGetBitmapFontFromFile("Data/Fonts/DaemonFont"); // DO NOT SPECIFY FILE .EXTENSION!!  (Important later on.)
-    g_bitmapFont = g_resourceSubsystem->CreateOrGetBitmapFontFromFile("Data/Fonts/DaemonFont");  // Use instance method
-    g_rng        = new RandomNumberGenerator();
+    // // g_bitmapFont = g_renderer->CreateOrGetBitmapFontFromFile("Data/Fonts/DaemonFont"); // DO NOT SPECIFY FILE .EXTENSION!!  (Important later on.)
+    // g_bitmapFont = g_resourceSubsystem->CreateOrGetBitmapFontFromFile("Data/Fonts/DaemonFont");  // Use instance method
+    // g_rng        = new RandomNumberGenerator();
     g_game       = new Game();
 }
 
@@ -140,13 +143,15 @@ void App::Startup()
 //
 void App::Shutdown()
 {
-    g_audio->Shutdown();
-    g_input->Shutdown();
-    g_devConsole->Shutdown();
-    DebugRenderSystemShutdown();
-    g_renderer->Shutdown();
-    g_window->Shutdown();
-    g_eventSystem->Shutdown();
+    GEngine::Get().Shutdown();
+
+    // g_audio->Shutdown();
+    // g_input->Shutdown();
+    // g_devConsole->Shutdown();
+    // DebugRenderSystemShutdown();
+    // g_renderer->Shutdown();
+    // g_window->Shutdown();
+    // g_eventSystem->Shutdown();
 }
 
 //----------------------------------------------------------------------------------------------------
