@@ -22,21 +22,42 @@ enum class eGameState : int8_t
 class Game
 {
 public:
+    //------------------------------------------------------------------------------------------------
+    // Construct / Destruct
+    //------------------------------------------------------------------------------------------------
     Game();
     ~Game();
 
+    //------------------------------------------------------------------------------------------------
+    // Life cycle
+    //------------------------------------------------------------------------------------------------
     void Update();
     void Render() const;
 
-    eGameState GetCurrentGameState() const;
-    void       ChangeGameState(eGameState newState);
+    //------------------------------------------------------------------------------------------------
+    // Game state
+    //------------------------------------------------------------------------------------------------
+    eGameState GetGameState() const;
+    void       SetGameState(eGameState newState);
 
 private:
+    //------------------------------------------------------------------------------------------------
+    // Game state
+    //------------------------------------------------------------------------------------------------
     static bool OnGameStateChanged(EventArgs& args);
-    void        UpdateFromInput();
-    void        AdjustForPauseAndTimeDistortion() const;
-    void        RenderAttractMode() const;
-    void        RenderGame() const;
+
+    //------------------------------------------------------------------------------------------------
+    // Update
+    //------------------------------------------------------------------------------------------------
+    void UpdateGame();
+    void UpdateTime() const;
+    void UpdateWindow() const;
+
+    //------------------------------------------------------------------------------------------------
+    // Render
+    //------------------------------------------------------------------------------------------------
+    void RenderAttract() const;
+    void RenderGame() const;
 
     eGameState m_gameState    = eGameState::ATTRACT;
     Camera*    m_screenCamera = nullptr;
