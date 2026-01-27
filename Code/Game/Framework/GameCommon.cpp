@@ -5,6 +5,7 @@
 //----------------------------------------------------------------------------------------------------
 #include "Game/Framework/GameCommon.hpp"
 //----------------------------------------------------------------------------------------------------
+#include "Engine/Core/EngineCommon.hpp"
 #include "Engine/Core/Rgba8.hpp"
 #include "Engine/Math/MathUtils.hpp"
 #include "Engine/Renderer/Renderer.hpp"
@@ -70,6 +71,7 @@ void DebugDrawRing(Vec2 const& center, float radius, float thickness, Rgba8 cons
     g_renderer->SetSamplerMode(eSamplerMode::POINT_CLAMP);
     g_renderer->SetDepthMode(eDepthMode::DISABLED);
     g_renderer->BindTexture(nullptr);
+    g_renderer->BindShader(nullptr);
     g_renderer->DrawVertexArray(NUM_VERTS, &verts[0]);
 }
 
@@ -108,5 +110,6 @@ void DebugDrawLine(Vec2 const& start, Vec2 const& end, float thickness, Rgba8 co
     g_renderer->SetSamplerMode(eSamplerMode::POINT_CLAMP);
     g_renderer->SetDepthMode(eDepthMode::DISABLED);
     g_renderer->BindTexture(nullptr);
+    g_renderer->BindShader(nullptr);
     g_renderer->DrawVertexArray(6, &verts[0]);
 }

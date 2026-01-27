@@ -10,20 +10,13 @@ class ResourceSubsystem;
 struct Rgba8;
 struct Vec2;
 class App;
-class AudioSystem;
 class BitmapFont;
 class Game;
-class Renderer;
-class RandomNumberGenerator;
 
 // one-time declaration
 extern App*                   g_app;
-extern AudioSystem*           g_audio;
 extern BitmapFont*            g_bitmapFont;
 extern Game*                  g_game;
-extern Renderer*              g_renderer;
-extern RandomNumberGenerator* g_rng;
-extern ResourceSubsystem*     g_resourceSubsystem;
 
 //----------------------------------------------------------------------------------------------------
 // DebugRender-related
