@@ -9,15 +9,6 @@
 //
 
 #pragma once
-//
-// Engine Build Preferences for Protogame2D
-//
-// These defines control which Engine subsystems are compiled and linked.
-// Disabling unused subsystems reduces binary size and removes runtime DLL dependencies.
-//
-
 // #define ENGINE_DISABLE_AUDIO	// Disables AudioSystem code and removes FMOD linkage
-#define ENGINE_DISABLE_SCRIPT	// Disables ScriptSubsystem code and removes V8 linkage
-
-// Enable Debug Rendering System
 #define ENGINE_DEBUG_RENDER
+#define ENGINE_DISABLE_SCRIPT	// Disables ScriptSubsystem code and removes V8 linkage
