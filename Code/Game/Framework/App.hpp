@@ -26,6 +26,7 @@ public:
     static bool OnCloseButtonClicked(EventArgs& args);
     static void RequestQuit();
     static bool m_isQuitting;
+    void        DeleteAndCreateNewGame();
 
 private:
     void BeginFrame() const;
@@ -34,7 +35,6 @@ private:
     void EndFrame() const;
 
     void UpdateCursorMode();
-    void DeleteAndCreateNewGame();
 
     Camera* m_devConsoleCamera = nullptr;
 };
