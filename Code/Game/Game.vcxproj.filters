@@ -23,18 +23,26 @@
       <Filter>Framework</Filter>
     </ClCompile>
     <ClCompile Include="Gameplay/Game.cpp">
-      <Filter>Framework</Filter>
+      <Filter>Gameplay</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="Framework/App.hpp" />
-    <ClInclude Include="Framework/GameCommon.hpp" />
-    <ClInclude Include="Gameplay/Game.hpp" />
     <ClInclude Include="EngineBuildPreferences.hpp">
+      <Filter>Framework</Filter>
+    </ClInclude>
+    <ClInclude Include="Framework/App.hpp">
+      <Filter>Framework</Filter>
+    </ClInclude>
+    <ClInclude Include="Gameplay/Game.hpp">
+      <Filter>Gameplay</Filter>
+    </ClInclude>
+    <ClInclude Include="Framework/GameCommon.hpp">
       <Filter>Framework</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
-    <None Include="../../Docs/README.md" />
+    <None Include="../../Docs/README.md">
+      <Filter>Document</Filter>
+    </None>
   </ItemGroup>
 </Project>
