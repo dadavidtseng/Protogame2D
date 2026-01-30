@@ -42,13 +42,31 @@
     <V8LibPath>$(SolutionDir)../Engine/Code/ThirdParty/packages/v8-v143-x64.13.0.245.25/lib/$(Configuration)/</V8LibPath>
     <V8RedistLibPath>$(SolutionDir)../Engine/Code/ThirdParty/packages/v8.redist-v143-x64.13.0.245.25/lib/$(Configuration)/</V8RedistLibPath>
     <FmodLibPath>$(SolutionDir)../Engine/Code/ThirdParty/fmod/</FmodLibPath>
-    <!-- Script Module Configuration: Enable/disable V8 JavaScript integration -->
-    <!-- Set to 'true' to include V8 runtime deployment, 'false' to deploy executable only -->
-    <EnableScriptModule>false</EnableScriptModule>
-    <!-- Audio Module Configuration: Enable/disable FMOD audio integration -->
-    <!-- Set to 'true' to include FMOD runtime deployment, 'false' to deploy executable only -->
-    <EnableAudioModule>true</EnableAudioModule>
+    <!-- Module Configuration: Automatically synchronized with EngineBuildPreferences.hpp -->
+    <!-- Read header file content inline during property evaluation -->
+    <PreferencesFileContent>$([System.IO.File]::ReadAllText('$(MSBuildProjectDirectory)\EngineBuildPreferences.hpp'))</PreferencesFileContent>
+    <!-- Detect ENGINE_DISABLE_SCRIPT: Check if file contains uncommented #define -->
+    <ScriptDisabled>false</ScriptDisabled>
+    <ScriptDisabled Condition="$([System.Text.RegularExpressions.Regex]::IsMatch($(PreferencesFileContent), '^\s*\#define\s+ENGINE_DISABLE_SCRIPT', RegexOptions.Multiline))">true</ScriptDisabled>
+    <!-- Detect ENGINE_DISABLE_AUDIO: Check if file contains uncommented #define -->
+    <AudioDisabled>false</AudioDisabled>
+    <AudioDisabled Condition="$([System.Text.RegularExpressions.Regex]::IsMatch($(PreferencesFileContent), '^\s*\#define\s+ENGINE_DISABLE_AUDIO', RegexOptions.Multiline))">true</AudioDisabled>
+    <!-- Set deployment flags (inverse of disable flags) -->
+    <EnableScriptModule Condition="'$(ScriptDisabled)'=='true'">false</EnableScriptModule>
+    <EnableScriptModule Condition="'$(ScriptDisabled)'=='false'">true</EnableScriptModule>
+    <EnableAudioModule Condition="'$(AudioDisabled)'=='true'">false</EnableAudioModule>
+    <EnableAudioModule Condition="'$(AudioDisabled)'=='false'">true</EnableAudioModule>
   </PropertyGroup>
+  <!-- //////////////////////////////////////////////////////////////////////////////////////////////// -->
+  <!-- Display Module Configuration at Build Time -->
+  <!-- //////////////////////////////////////////////////////////////////////////////////////////////// -->
+  <Target Name="ShowModuleConfiguration" BeforeTargets="Build">
+    <Message Text="━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━" Importance="high" />
+    <Message Text="Engine Module Configuration (from EngineBuildPreferences.hpp):" Importance="high" />
+    <Message Text="  ENGINE_DISABLE_SCRIPT: $(ScriptDisabled) → EnableScriptModule: $(EnableScriptModule)" Importance="high" />
+    <Message Text="  ENGINE_DISABLE_AUDIO:  $(AudioDisabled) → EnableAudioModule: $(EnableAudioModule)" Importance="high" />
+    <Message Text="━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━" Importance="high" />
+  </Target>
   <!-- //////////////////////////////////////////////////////////////////////////////////////////////// -->
   <!-- Configuration-Specific Properties -->
   <!-- //////////////////////////////////////////////////////////////////////////////////////////////// -->
