@@ -156,7 +156,7 @@ void App::EndFrame() const
 void App::UpdateCursorMode()
 {
     bool const        doesWindowHasFocus   = GetActiveWindow() == g_window->GetWindowHandle();
-    bool const        isAttractState       = g_game->GetGameState() == eGameState::ATTRACT;
+    bool const        isAttractState       = g_game->IsAttractState();
     bool const        shouldUsePointerMode = !doesWindowHasFocus || g_devConsole->IsOpen() || isAttractState;
     eCursorMode const mode                 = shouldUsePointerMode ? eCursorMode::POINTER : eCursorMode::FPS;
 

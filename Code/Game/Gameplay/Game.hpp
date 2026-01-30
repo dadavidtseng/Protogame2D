@@ -39,6 +39,8 @@ public:
     //------------------------------------------------------------------------------------------------
     eGameState GetGameState() const;
     void       SetGameState(eGameState newState);
+    bool       IsAttractState() const;
+    bool       IsGameState() const;
 
 private:
     //------------------------------------------------------------------------------------------------

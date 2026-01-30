@@ -17,7 +17,6 @@
 #include "Engine/Renderer/DebugRenderSystem.hpp"
 
 //----------------------------------------------------------------------------------------------------
-///
 Game::Game()
 {
     DAEMON_LOG(LogGame, eLogVerbosity::Display, "(Game)(start)");
@@ -55,7 +54,7 @@ void Game::Update()
     Vec2 const      screenTopLeft = m_screenCamera->GetOrthographicTopLeft();
     float constexpr textHeight    = 20.f;
 
-    DebugAddScreenText(Stringf("Time: %.2f FPS: %.2f Scale: %.1f", m_gameClock->GetTotalSeconds(), 1.f / m_gameClock->GetDeltaSeconds(), m_gameClock->GetTimeScale()), screenTopLeft - Vec2(0.f, textHeight), textHeight, Vec2::ZERO, 0.f);
+    DebugAddScreenText(Stringf("Time: %.2f FPS: %.2f Scale: %.1f", m_gameClock->GetTotalSeconds(), 1.f / m_gameClock->GetDeltaSeconds(), m_gameClock->GetTimeScale()), screenTopLeft - Vec2(0.f, textHeight), textHeight, Vec2(1, 1), 0.f);
     UpdateGame();
     UpdateTime();
     UpdateWindow();
@@ -67,11 +66,11 @@ void Game::Render() const
     //-Start-of-Screen-Camera-------------------------------------------------------------------------
     g_renderer->BeginCamera(*m_screenCamera);
 
-    if (m_gameState == eGameState::ATTRACT)
+    if (IsAttractState())
     {
         RenderAttract();
     }
-    else if (m_gameState == eGameState::GAME)
+    else if (IsGameState())
     {
         RenderGame();
         DebugRenderScreen(*m_screenCamera);
@@ -92,10 +91,10 @@ eGameState Game::GetGameState() const
 
 //----------------------------------------------------------------------------------------------------
 ///
-/// 1. Set current game state to new game state
-/// 2. Fire the OnGameStateChanged event to all subscribers
+/// 1. Set current game state to new game state.
+/// 2. Fire the OnGameStateChanged event to all subscribers.
 ///
-/// @param newState new game state for current game state to change to
+/// @param newState new game state for current game state to change to.
 ///
 void Game::SetGameState(eGameState const newState)
 {
@@ -109,6 +108,24 @@ void Game::SetGameState(eGameState const newState)
     m_gameState = newState;
 
     g_eventSystem->FireEvent("OnGameStateChanged", args);
+}
+
+//----------------------------------------------------------------------------------------------------
+///
+/// @return true if current game state is ATTRACT.
+//----------------------------------------------------------------------------------------------------
+bool Game::IsAttractState() const
+{
+    return m_gameState == eGameState::ATTRACT;
+}
+
+//----------------------------------------------------------------------------------------------------
+///
+/// @return true if current game state is GAME.
+//----------------------------------------------------------------------------------------------------
+bool Game::IsGameState() const
+{
+    return m_gameState == eGameState::GAME;
 }
 
 //----------------------------------------------------------------------------------------------------
@@ -138,7 +155,7 @@ STATIC bool Game::OnGameStateChanged(EventArgs& args)
 //----------------------------------------------------------------------------------------------------
 void Game::UpdateGame()
 {
-    if (m_gameState == eGameState::ATTRACT)
+    if (IsAttractState())
     {
         if (g_input->WasKeyJustPressed(KEYCODE_ESC))
         {
@@ -149,7 +166,7 @@ void Game::UpdateGame()
             SetGameState(eGameState::GAME);
         }
     }
-    else if (m_gameState == eGameState::GAME)
+    else if (IsGameState())
     {
         if (g_input->WasKeyJustPressed(KEYCODE_ESC))
         {
@@ -186,7 +203,7 @@ void Game::UpdateTime() const
 //----------------------------------------------------------------------------------------------------
 void Game::UpdateWindow() const
 {
-    if (m_gameState == eGameState::ATTRACT)
+    if (IsAttractState())
     {
         if (g_input->WasKeyJustPressed(KEYCODE_R))
         {
@@ -197,6 +214,9 @@ void Game::UpdateWindow() const
 }
 
 //----------------------------------------------------------------------------------------------------
+///
+/// @brief Render a simple outlined disc 2D in ATTRACT state.
+//
 void Game::RenderAttract() const
 {
     Vec2 const clientDimensions = Window::s_mainWindow->GetClientDimensions();
@@ -216,6 +236,9 @@ void Game::RenderAttract() const
 }
 
 //----------------------------------------------------------------------------------------------------
+///
+/// @brief Render two line segments 2D in GAME state.
+//
 void Game::RenderGame() const
 {
     Vec2 const clientDimensions = Window::s_mainWindow->GetClientDimensions();
