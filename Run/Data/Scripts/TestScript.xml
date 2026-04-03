@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CommandScript>
+    <ChangeMap map="TestLevel" startPos="3,5"/>
+    <SpawnActor type="NPC" pos="10,20" name="Test NPC" faction="friendly"/>
+    <TestQuotes a="hello world" b="42"/>
+</CommandScript>
