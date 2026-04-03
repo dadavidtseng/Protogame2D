@@ -35,6 +35,4 @@ private:
     void EndFrame() const;
 
     void UpdateCursorMode();
-
-    Camera* m_devConsoleCamera = nullptr;
 };
