@@ -23,6 +23,7 @@
 #include "Engine/Platform/Window.hpp"
 #include "Engine/Renderer/Camera.hpp"
 #include "Engine/Renderer/BitmapFont.hpp"
+#include "Engine/Renderer/Image.hpp"
 #include "Engine/Renderer/DebugRenderSystem.hpp"
 #include "Engine/Renderer/Renderer.hpp"
 #include "Engine/Renderer/Shader.hpp"
@@ -450,8 +451,21 @@ STATIC bool App::Command_TestFont(EventArgs& args)
         char const* tierNames[] = {"", "Tier 1 (Fixed-Width)", "Tier 2 (Auto-Width)", "Tier 3 (BMFont+Kerning)", "Tier 4 (SDF Threshold)", "Tier 5 (VertexFont+Effects)"};
         g_devConsole->AddLine(DevConsole::INFO_MAJOR, Stringf("[TestFont] Showing %s", tierNames[tier]));
 
+        // Tier 2: on-demand auto-width scanning (mutates font in-place for demo)
+        if (tier == 2 && s_tier1Font && s_tier1Font->GetFontTier() < eFontTier::TIER_2)
+        {
+            Image fontImage("Data/Fonts/SquirrelFixedFont.png");
+            if (fontImage.GetDimensions().x > 0)
+            {
+                s_tier1Font->ComputeAutoWidths(fontImage);
+                g_devConsole->AddLine(DevConsole::INFO_MINOR, "  Auto-width scanning applied to SquirrelFixedFont");
+            }
+        }
+
         if (tier == 1 && s_tier1Font)
             g_devConsole->AddLine(DevConsole::INFO_MINOR, Stringf("  Font tier: %d", static_cast<int>(s_tier1Font->GetFontTier())));
+        if (tier == 2 && s_tier1Font)
+            g_devConsole->AddLine(DevConsole::INFO_MINOR, Stringf("  Font tier: %d (auto-width)", static_cast<int>(s_tier1Font->GetFontTier())));
         if ((tier == 3) && s_tier3Font)
             g_devConsole->AddLine(DevConsole::INFO_MINOR, Stringf("  Font tier: %d, glyphs loaded via BMFont .fnt", static_cast<int>(s_tier3Font->GetFontTier())));
         if ((tier == 4 || tier == 5) && s_sdfFont)
