@@ -19,8 +19,14 @@
 #include "Engine/Core/XmlUtils.hpp"
 #include "Engine/Input/InputSystem.hpp"
 #include "Engine/Math/Vec2.hpp"
+#include "Engine/Core/Clock.hpp"
 #include "Engine/Platform/Window.hpp"
+#include "Engine/Renderer/Camera.hpp"
+#include "Engine/Renderer/BitmapFont.hpp"
 #include "Engine/Renderer/DebugRenderSystem.hpp"
+#include "Engine/Renderer/Renderer.hpp"
+#include "Engine/Renderer/Shader.hpp"
+#include "Engine/Renderer/Vertex_Font.hpp"
 #include "Engine/Resource/ResourceSubsystem.hpp"
 
 //----------------------------------------------------------------------------------------------------
@@ -34,6 +40,15 @@ Game* g_game = nullptr;     // Created and owned by the App
 
 //----------------------------------------------------------------------------------------------------
 STATIC bool App::m_isQuitting = false;
+
+// SD4-A3c: Font demo state
+STATIC int         App::s_currentFontTier  = 0;
+STATIC float       App::s_effectIntensity  = 1.f;
+STATIC BitmapFont* App::s_tier1Font        = nullptr;
+STATIC BitmapFont* App::s_tier3Font        = nullptr;
+STATIC BitmapFont* App::s_sdfFont          = nullptr;
+STATIC Shader*     App::s_sdfShader        = nullptr;
+STATIC Shader*     App::s_fontShader       = nullptr;
 
 //----------------------------------------------------------------------------------------------------
 App::App()
@@ -68,6 +83,19 @@ void App::Startup()
 
     // SD4-A3a: Subscribe member function event handler
     g_eventSystem->SubscribeEventCallbackObjectMethod("TestMemberEvent", this, &App::Event_TestMember);
+
+    // SD4-A3c: Register font demo commands
+    g_eventSystem->SubscribeEventCallbackFunction("TestFont", Command_TestFont);
+    g_eventSystem->SubscribeEventCallbackFunction("FontEffect", Command_FontEffect);
+
+    // SD4-A3c: Load fonts at different tiers
+    s_tier1Font  = g_resourceSubsystem->CreateOrGetBitmapFontFromFile("Data/Fonts/SquirrelFixedFont"); // Tier 1 (no .fnt)
+    s_tier3Font  = g_resourceSubsystem->CreateOrGetBitmapFontFromFile("Data/Fonts/DaemonFont");        // Tier 3 (has .fnt)
+    s_sdfFont    = g_resourceSubsystem->CreateOrGetBitmapFontFromFile("Data/Fonts/SDFDaemonFont");     // Tier 4 (SDF .fnt)
+
+    // SD4-A3c: Load shaders
+    s_sdfShader  = g_resourceSubsystem->CreateOrGetShaderFromFile("Data/Shaders/SDF");
+    s_fontShader = g_resourceSubsystem->CreateOrGetShaderFromFile("Data/Shaders/Font", eVertexType::VERTEX_FONT);
 
     g_game = new Game();
 }
@@ -156,6 +184,12 @@ void App::Render() const
 
     g_renderer->ClearScreen(clearColor);
     g_game->Render();
+
+    // SD4-A3c: Render font demo overlay if active
+    if (s_currentFontTier > 0)
+    {
+        RenderFontDemo();
+    }
 
     AABB2 const box = AABB2(Vec2::ZERO, Vec2(1600.f, 30.f));
 
@@ -390,4 +424,151 @@ STATIC bool App::Command_TestTrigger(EventArgs& args)
     }
 
     return false;
+}
+
+//----------------------------------------------------------------------------------------------------
+// SD4-A3c Demo: TestFont command
+//----------------------------------------------------------------------------------------------------
+STATIC bool App::Command_TestFont(EventArgs& args)
+{
+    int const tier = args.GetValue("tier", 0);
+
+    if (tier < 0 || tier > 5)
+    {
+        g_devConsole->AddLine(DevConsole::ERROR, "TestFont: tier must be 0-5. Usage: TestFont tier=3");
+        return false;
+    }
+
+    s_currentFontTier = tier;
+
+    if (tier == 0)
+    {
+        g_devConsole->AddLine(DevConsole::INFO_MAJOR, "[TestFont] Font demo disabled.");
+    }
+    else
+    {
+        char const* tierNames[] = {"", "Tier 1 (Fixed-Width)", "Tier 2 (Auto-Width)", "Tier 3 (BMFont+Kerning)", "Tier 4 (SDF Threshold)", "Tier 5 (VertexFont+Effects)"};
+        g_devConsole->AddLine(DevConsole::INFO_MAJOR, Stringf("[TestFont] Showing %s", tierNames[tier]));
+
+        if (tier == 1 && s_tier1Font)
+            g_devConsole->AddLine(DevConsole::INFO_MINOR, Stringf("  Font tier: %d", static_cast<int>(s_tier1Font->GetFontTier())));
+        if ((tier == 3) && s_tier3Font)
+            g_devConsole->AddLine(DevConsole::INFO_MINOR, Stringf("  Font tier: %d, glyphs loaded via BMFont .fnt", static_cast<int>(s_tier3Font->GetFontTier())));
+        if ((tier == 4 || tier == 5) && s_sdfFont)
+            g_devConsole->AddLine(DevConsole::INFO_MINOR, Stringf("  Font tier: %d, SDF: %s", static_cast<int>(s_sdfFont->GetFontTier()), s_sdfFont->IsSDF() ? "true" : "false"));
+    }
+
+    return false;
+}
+
+//----------------------------------------------------------------------------------------------------
+// SD4-A3c Demo: FontEffect command
+//----------------------------------------------------------------------------------------------------
+STATIC bool App::Command_FontEffect(EventArgs& args)
+{
+    float const intensity = args.GetValue("intensity", s_effectIntensity);
+    s_effectIntensity = intensity;
+
+    g_devConsole->AddLine(DevConsole::INFO_MAJOR, Stringf("[FontEffect] intensity=%.2f", s_effectIntensity));
+
+    return false;
+}
+
+//----------------------------------------------------------------------------------------------------
+// SD4-A3c Demo: Render font demo overlay
+//----------------------------------------------------------------------------------------------------
+void App::RenderFontDemo() const
+{
+    // Set up screen-space camera
+    Camera screenCam;
+    Vec2 const screenTopRight = Window::s_mainWindow->GetClientDimensions();
+    screenCam.SetOrthoGraphicView(Vec2::ZERO, screenTopRight);
+    screenCam.SetNormalizedViewport(AABB2::ZERO_TO_ONE);
+
+    g_renderer->BeginCamera(screenCam);
+
+    String const line1 = "The quick brown fox jumps over the lazy dog";
+    String const line2 = "AV To WAR 0123456789 !@#$%";
+    float const  textH = 24.f;
+    float const  topY  = screenTopRight.y;
+
+    if (s_currentFontTier == 1 || s_currentFontTier == 2)
+    {
+        // Tier 1/2: SquirrelFixedFont (no .fnt -> Tier 2 auto-width)
+        BitmapFont* font = s_tier1Font;
+        if (!font) { g_renderer->EndCamera(screenCam); return; }
+
+        VertexList_PCU verts;
+        font->AddVertsForText2D(verts, line1, Vec2(50.f, topY - 120.f), textH, Rgba8::WHITE);
+        font->AddVertsForText2D(verts, line2, Vec2(50.f, topY - 160.f), textH, Rgba8::YELLOW);
+
+        String label = (s_currentFontTier == 1) ? "Tier 1: Fixed-Width (SquirrelFixedFont)" : "Tier 2: Auto-Width (SquirrelFixedFont)";
+        font->AddVertsForText2D(verts, label, Vec2(50.f, topY - 80.f), 16.f, Rgba8::GREEN);
+
+        g_renderer->SetSamplerMode(eSamplerMode::POINT_CLAMP);
+        g_renderer->BindShader(nullptr);
+        g_renderer->BindTexture(&font->GetTexture());
+        g_renderer->DrawVertexArray(verts);
+    }
+    else if (s_currentFontTier == 3)
+    {
+        // Tier 3: DaemonFont with BMFont metadata + kerning
+        BitmapFont* font = s_tier3Font;
+        if (!font) { g_renderer->EndCamera(screenCam); return; }
+
+        VertexList_PCU verts;
+        font->AddVertsForText2D(verts, line1, Vec2(50.f, topY - 120.f), textH, Rgba8::WHITE);
+        font->AddVertsForText2D(verts, line2, Vec2(50.f, topY - 160.f), textH, Rgba8::YELLOW);
+        font->AddVertsForText2D(verts, "Tier 3: BMFont + Kerning (DaemonFont)", Vec2(50.f, topY - 80.f), 16.f, Rgba8::GREEN);
+
+        g_renderer->SetSamplerMode(eSamplerMode::POINT_CLAMP);
+        g_renderer->BindShader(nullptr);
+        g_renderer->BindTexture(&font->GetTexture());
+        g_renderer->DrawVertexArray(verts);
+    }
+    else if (s_currentFontTier == 4)
+    {
+        // Tier 4: SDF font with threshold shader
+        BitmapFont* font = s_sdfFont;
+        if (!font) { g_renderer->EndCamera(screenCam); return; }
+
+        VertexList_PCU verts;
+        font->AddVertsForText2D(verts, line1, Vec2(50.f, topY - 120.f), textH, Rgba8::WHITE);
+        font->AddVertsForText2D(verts, line2, Vec2(50.f, topY - 160.f), textH, Rgba8::YELLOW);
+        font->AddVertsForText2D(verts, "Tier 4: SDF Threshold (SDFDaemonFont)", Vec2(50.f, topY - 80.f), 16.f, Rgba8::GREEN);
+
+        // Large text to show SDF crisp scaling
+        font->AddVertsForText2D(verts, "BIG SDF", Vec2(50.f, topY - 320.f), 80.f, Rgba8::CYAN);
+
+        g_renderer->SetSamplerMode(eSamplerMode::BILINEAR_CLAMP);
+        g_renderer->BindShader(s_sdfShader);
+        g_renderer->BindTexture(&font->GetTexture());
+        g_renderer->DrawVertexArray(verts);
+    }
+    else if (s_currentFontTier == 5)
+    {
+        // Tier 5: VertexFont with effects shader
+        BitmapFont* font = s_sdfFont;
+        if (!font) { g_renderer->EndCamera(screenCam); return; }
+
+        VertexList_Font verts;
+        font->AddVertsForText2D(verts, line1, Vec2(50.f, topY - 120.f), textH, Rgba8::WHITE);
+        font->AddVertsForText2D(verts, line2, Vec2(50.f, topY - 160.f), textH, Rgba8::YELLOW);
+        font->AddVertsForText2D(verts, "Tier 5: Wave + Rainbow Effects", Vec2(50.f, topY - 80.f), 16.f, Rgba8::GREEN);
+
+        // Large text for dramatic effect
+        font->AddVertsForText2D(verts, "FANCY FONTS!", Vec2(50.f, topY - 320.f), 60.f, Rgba8::WHITE);
+
+        g_renderer->SetPerFrameConstants(static_cast<float>(Clock::GetSystemClock().GetTotalSeconds()));
+        g_renderer->SetSamplerMode(eSamplerMode::BILINEAR_CLAMP);
+        g_renderer->BindShader(s_fontShader);
+        g_renderer->SetFontConstants(0.5f, s_effectIntensity);
+        g_renderer->BindTexture(&font->GetTexture());
+        g_renderer->DrawVertexArray(verts);
+    }
+
+    // Reset to default state
+    g_renderer->BindShader(nullptr);
+    g_renderer->SetSamplerMode(eSamplerMode::POINT_CLAMP);
+    g_renderer->EndCamera(screenCam);
 }
